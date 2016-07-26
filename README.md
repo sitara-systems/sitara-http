@@ -1,6 +1,6 @@
 # ofxCurl
 
-A wrapper to simplify using the libcurl for transferring data, typically over a network.
+A wrapper to simplify using the libcurl for transferring data, typically over a network.  This implementation uses a stateful curl instance, so that you don't need to reset options after every call.
 
 ## Requirements
 None.
