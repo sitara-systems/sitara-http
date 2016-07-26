@@ -19,36 +19,47 @@ Curl::~Curl() {
 
 std::string Curl::post(std::string &url, std::map<std::string, std::string> &parameters) {
 	bool usePost = true;
-	std::string postString = "";
 
-	for (auto it = parameters.begin(); it != parameters.end(); ++it) {
-		std::string key = curl_easy_escape(mCurl, it->first.c_str(), 0);
-		std::string value = curl_easy_escape(mCurl, it->second.c_str(), 0);
-		postString += key;
-		postString += "=";
-		postString += value;
-		postString += "&";
-	}
+	std::string postString = mapToString(parameters);
 
 	return easyPerform(url, usePost, postString);
 }
 
+std::string Curl::post(std::string &url, std::string &parameters) {
+	bool usePost = true;
+
+	return easyPerform(url, usePost, parameters);
+}
+
+std::string Curl::post(std::string &url) {
+	bool usePost = true;
+
+	return easyPerform(url, usePost, std::string(""));
+}
+
 std::string Curl::post(char* url, std::map<std::string, std::string> &parameters) {
 	bool usePost = true;
-	std::string postString = "";
-
-	for (auto it = parameters.begin(); it != parameters.end(); ++it) {
-		std::string key = curl_easy_escape(mCurl, it->first.c_str(), 0);
-		std::string value = curl_easy_escape(mCurl, it->second.c_str(), 0);
-		postString += key;
-		postString += "=";
-		postString += value;
-		postString += "&";
-	}
+	std::string postString = mapToString(parameters);
 
 	std::string newUrl(url);
 
 	return easyPerform(newUrl, usePost, postString);
+}
+
+std::string Curl::post(char* url, std::string &parameters) {
+	bool usePost = true;
+
+	std::string newUrl(url);
+
+	return easyPerform(newUrl, usePost, parameters);
+}
+
+std::string Curl::post(char* url) {
+	bool usePost = true;
+
+	std::string newUrl(url);
+
+	return easyPerform(newUrl, usePost, std::string(""));
 }
 
 std::string Curl::get(std::string &url) {
@@ -70,10 +81,11 @@ std::string Curl::easyPerform(std::string& url, bool post, std::string &postPara
 
 	curl_easy_setopt(mCurl, CURLOPT_URL, url.c_str());
 	if (post) {
+		std::printf("posting url %s", url.c_str());
+
 		curl_easy_setopt(mCurl, CURLOPT_POST, 1);
 		curl_easy_setopt(mCurl, CURLOPT_POSTFIELDS, postParamString.c_str());
 	}
-
 	mCurlResult = curl_easy_perform(mCurl);
 
 	curl_easy_cleanup(mCurl);
@@ -89,6 +101,28 @@ std::string Curl::easyPerform(std::string& url, bool post, std::string &postPara
 
 void Curl::setUserAgent(std::string &agent) {
 	mUserAgent = agent;
+}
+
+std::string ofxCurl::Curl::mapToString(std::map<std::string, std::string> map) {
+	std::string output = "";
+
+	for (auto it = map.begin(); it != map.end(); ++it) {
+		if (it != map.begin()) {
+			output += "&";
+		}
+		std::string key = curl_easy_escape(mCurl, it->first.c_str(), 0);
+		std::string value = curl_easy_escape(mCurl, it->second.c_str(), 0);
+		output += key;
+		output += "=";
+		output += value;
+	}
+
+	return output;
+}
+
+std::string Curl::makeStringSafe(std::string input) {
+	std::string output = curl_easy_escape(mCurl, input.c_str(), 0);
+	return output;
 }
 
 void Curl::setOptions() {
