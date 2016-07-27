@@ -62,8 +62,30 @@ std::string Curl::post(char* url) {
 	return easyPerform(newUrl, usePost, std::string(""));
 }
 
+std::string Curl::get(std::string &url, std::map<std::string, std::string> &parameters) {
+	std::string postString = mapToString(parameters);
+	return easyPerform(url, false, postString);
+}
+
+std::string Curl::get(std::string &url, std::string &parameters) {
+	return easyPerform(url, false, parameters);
+}
+
 std::string Curl::get(std::string &url) {
 	return easyPerform(url, false, std::string(""));
+}
+
+std::string Curl::get(char* url, std::map<std::string, std::string> &parameters) {
+	std::string postString = mapToString(parameters);
+	std::string newUrl(url);
+
+	return easyPerform(newUrl, false, postString);
+}
+
+std::string Curl::get(char* url, std::string &parameters) {
+	std::string newUrl(url);
+
+	return easyPerform(newUrl, false, parameters);
 }
 
 std::string Curl::get(char* url) {
@@ -81,11 +103,16 @@ std::string Curl::easyPerform(std::string& url, bool post, std::string &postPara
 
 	curl_easy_setopt(mCurl, CURLOPT_URL, url.c_str());
 	if (post) {
-		std::printf("posting url %s", url.c_str());
-
 		curl_easy_setopt(mCurl, CURLOPT_POST, 1);
 		curl_easy_setopt(mCurl, CURLOPT_POSTFIELDS, postParamString.c_str());
+		curl_easy_setopt(mCurl, CURLOPT_URL, url.c_str());
 	}
+	else {
+		// otherwise, it's a GET request
+		std::string get_url = url + "?" + postParamString;
+		curl_easy_setopt(mCurl, CURLOPT_URL, get_url.c_str());
+	}
+
 	mCurlResult = curl_easy_perform(mCurl);
 
 	curl_easy_cleanup(mCurl);

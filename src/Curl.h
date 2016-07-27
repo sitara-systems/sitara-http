@@ -18,7 +18,11 @@ namespace ofxCurl {
 		std::string post(char* url, std::map<std::string, std::string> &parameters);
 		std::string post(char* url, std::string &parameters);
 		std::string post(char* url);
+		std::string get(std::string &url, std::map<std::string, std::string> &parameters);
+		std::string get(std::string &url, std::string &parameters);
 		std::string get(std::string &url);
+		std::string get(char* url, std::map<std::string, std::string> &parameters);
+		std::string get(char* url, std::string &parameters);
 		std::string get(char* url);
 		void setUserAgent(std::string &agent);
 		std::string mapToString(std::map<std::string, std::string> map);
