@@ -8,6 +8,7 @@ std::shared_ptr<Curl> Curl::make() {
 }
 
 Curl::Curl() : mErrorBuffer(CURL_ERROR_SIZE) {
+	curl_global_init(CURL_GLOBAL_ALL);
 	mCurl = curl_easy_init();
 	mOutputBuffer = "";
 	mErrorBuffer[0] = 0;
@@ -15,6 +16,8 @@ Curl::Curl() : mErrorBuffer(CURL_ERROR_SIZE) {
 }
 
 Curl::~Curl() {
+	curl_easy_cleanup(mCurl);
+	curl_global_cleanup();
 }
 
 std::string Curl::post(std::string &url, std::map<std::string, std::string> &parameters) {
@@ -113,11 +116,9 @@ std::string Curl::easyPerform(std::string& url, bool post, std::string &postPara
 		curl_easy_setopt(mCurl, CURLOPT_URL, get_url.c_str());
 	}
 
-	mCurlResult = curl_easy_perform(mCurl);
+	CURLcode curlResult = curl_easy_perform(mCurl);
 
-	curl_easy_cleanup(mCurl);
-
-	if (mCurlResult == CURLE_OK) {
+	if (curlResult == CURLE_OK) {
 		return mOutputBuffer;
 	}
 	else {
@@ -157,6 +158,7 @@ void Curl::setOptions() {
 	curl_easy_setopt(mCurl, CURLOPT_HEADER, 0);
 	curl_easy_setopt(mCurl, CURLOPT_FOLLOWLOCATION, 1);
 	curl_easy_setopt(mCurl, CURLOPT_WRITEFUNCTION, &writeCallback);
+	mOutputBuffer.clear();
 	curl_easy_setopt(mCurl, CURLOPT_WRITEDATA, &mOutputBuffer);
 	curl_easy_setopt(mCurl, CURLOPT_SSL_VERIFYHOST, 2);
 	curl_easy_setopt(mCurl, CURLOPT_USERAGENT, mUserAgent.c_str());

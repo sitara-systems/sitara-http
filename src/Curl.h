@@ -33,7 +33,6 @@ namespace ofxCurl {
 		std::string easyPerform(std::string &url, bool post, std::string &postParamString);
 		static size_t writeCallback(char* contents, size_t size, size_t nmemb, std::string* buffer);
 		CURL* mCurl;
-		CURLcode mCurlResult;
 		std::string mOutputBuffer;
 		std::string mUserAgent;
 		std::vector<char> mErrorBuffer;
