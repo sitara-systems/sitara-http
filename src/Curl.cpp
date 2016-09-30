@@ -30,20 +30,6 @@ std::string Curl::post(const std::string &url, const std::string &parameters) {
 	return easyPerform(url, HTTP_POST, parameters);
 }
 
-std::string Curl::post(const char* url, const std::map<std::string, std::string> &parameters) {
-	std::string paramString = mapToString(parameters);
-
-	std::string newUrl(url);
-
-	return easyPerform(newUrl, HTTP_POST, paramString);
-}
-
-std::string Curl::post(const char* url, const std::string &parameters) {
-	std::string newUrl(url);
-
-	return easyPerform(newUrl, HTTP_POST, parameters);
-}
-
 std::string Curl::put(const std::string &url, const std::map<std::string, std::string> &parameters) {
 	std::string paramString = mapToString(parameters);
 
@@ -52,20 +38,6 @@ std::string Curl::put(const std::string &url, const std::map<std::string, std::s
 
 std::string Curl::put(const std::string &url, const std::string &parameters) {
 	return easyPerform(url, HTTP_PUT, parameters);
-}
-
-std::string Curl::put(const char* url, const std::map<std::string, std::string> &parameters) {
-	std::string paramString = mapToString(parameters);
-
-	std::string newUrl(url);
-
-	return easyPerform(newUrl, HTTP_PUT, paramString);
-}
-
-std::string Curl::put(const char* url, const std::string &parameters) {
-	std::string newUrl(url);
-
-	return easyPerform(newUrl, HTTP_PUT, parameters);
 }
 
 std::string Curl::get(const std::string &url, const std::map<std::string, std::string> &parameters) {
@@ -81,43 +53,12 @@ std::string Curl::get(const std::string &url) {
 	return easyPerform(url, HTTP_GET, std::string(""));
 }
 
-std::string Curl::get(const char* url, const std::map<std::string, std::string> &parameters) {
-	std::string paramString = mapToString(parameters);
-	std::string newUrl(url);
-
-	return easyPerform(newUrl, HTTP_GET, paramString);
-}
-
-std::string Curl::get(const char* url, const std::string &parameters) {
-	std::string newUrl(url);
-
-	return easyPerform(newUrl, HTTP_GET, parameters);
-}
-
-std::string Curl::get(const char* url) {
-	std::string newUrl(url);
-
-	return easyPerform(newUrl, HTTP_GET, std::string(""));
-}
-
 std::string Curl::del(const std::string &url) {
 	return easyPerform(url, HTTP_DELETE, std::string(""));
 }
 
-std::string Curl::del(const char* url) {
-	std::string newUrl(url);
-
-	return easyPerform(newUrl, HTTP_DELETE, std::string(""));
-}
-
 std::string Curl::head(const std::string &url) {
 	return easyPerform(url, HTTP_HEAD, std::string(""));
-}
-
-std::string Curl::head(const char* url) {
-	std::string newUrl(url);
-
-	return easyPerform(newUrl, HTTP_HEAD, std::string(""));
 }
 
 std::string Curl::easyPerform(const std::string& url, HTTPMethod method, const std::string &postParamString) {
