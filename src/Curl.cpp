@@ -70,13 +70,60 @@ void Curl::updateThreads() {
 		while (mCurrentNumberOfThreads < mMaxNumberOfThreads && mRequestQueue.size() > 0) {
 			loadRequest();
 		}
-		curl_multi_perform(mMultiCurl, &mCurrentNumberOfThreads);
+		do {
+			int numfds = 0;
+			int result = curl_multi_wait(mMultiCurl, NULL, 0, MAX_WAIT_MSECS, &numfds);
+			if (result != CURLM_OK) {
+				std::printf("ofxCurl ERROR: curl_multi_wait() return %d\n", result);
+			}
+			curl_multi_perform(mMultiCurl, &mCurrentNumberOfThreads);
+		} while (mCurrentNumberOfThreads);
+
+		CURLMsg* msg = NULL;
+		CURLcode return_code;
+		int msgs_left = 0;
+		int http_status_code;
+		const char *szUrl;
+		CURL* curl_instance;
+
+		while ((msg = curl_multi_info_read(mMultiCurl, &msgs_left))) {
+			if (msg->msg == CURLMSG_DONE) {
+				curl_instance = msg->easy_handle;
+
+				return_code = msg->data.result;
+				if (return_code != CURLE_OK) {
+					std::printf("CURL error code: %d\n", msg->data.result);
+					continue;
+				}
+
+				// Get HTTP status code
+				http_status_code = 0;
+				szUrl = NULL;
+
+				curl_easy_getinfo(curl_instance, CURLINFO_RESPONSE_CODE, &http_status_code);
+				curl_easy_getinfo(curl_instance, CURLINFO_PRIVATE, &szUrl);
+
+				if (http_status_code == 200) {
+					std::printf("200 OK for %s\n", szUrl);
+				}
+				else {
+					std::printf("GET of %s returned http status code %d\n", szUrl, http_status_code);
+				}
+
+				curl_multi_remove_handle(mMultiCurl, curl_instance);
+				curl_easy_cleanup(curl_instance);
+			}
+			else {
+				fprintf(stderr, "error: after curl_multi_info_read(), CURLMsg=%d\n", msg->msg);
+			}
+		}
+
 	}
 }
 
 void Curl::loadRequest() {
 	HTTPRequest request = mRequestQueue.front();
-	
+			
 	CURL* c = curl_easy_init();
 	setOptions(c);
 

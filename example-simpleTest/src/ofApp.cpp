@@ -7,25 +7,36 @@ void ofApp::setup(){
 	std::map<std::string, std::string> requestParameters;
 	requestParameters["foo"] = "bar baz";
 
-	std::cout << "Testing GET request.." << std::endl;
-	std::string get_result = mCurl->get("http://www.httpbin.org/get", requestParameters);
-	std::printf("Message received: \n %s", get_result.c_str());
+	ofxCurl::HTTPRequest Get;
+	Get.mUrl = "http://www.httpbin.org/get";
+	Get.mMethod = ofxCurl::HTTP_GET;
+	Get.mParameterString = "";
+	mCurl->addHTTPRequest(Get);
 
-	std::cout << "Testing POST request.." << std::endl;
-	std::string post_result = mCurl->post("http://www.httpbin.org/post", requestParameters);
-	std::printf("Message received: \n %s", post_result.c_str());
+	ofxCurl::HTTPRequest Post;
+	Post.mUrl = "http://www.httpbin.org/post";
+	Post.mMethod = ofxCurl::HTTP_POST;
+	Post.mParameterString = "";
+	mCurl->addHTTPRequest(Post);
 
-	std::cout << "Testing PUT request.." << std::endl;
-	std::string put_result = mCurl->put("http://www.httpbin.org/put", requestParameters);
-	std::printf("Message received: \n %s", put_result.c_str());
+	ofxCurl::HTTPRequest Put;
+	Put.mUrl = "http://www.httpbin.org/put";
+	Put.mMethod = ofxCurl::HTTP_PUT;
+	Put.mParameterString = "";
+	mCurl->addHTTPRequest(Put);
 
-	std::cout << "Testing DELETE request.." << std::endl;
-	std::string delete_result = mCurl->del("http://www.httpbin.org/delete");
-	std::printf("Message received: \n %s", delete_result.c_str());
+	ofxCurl::HTTPRequest Delete;
+	Delete.mUrl = "http://www.httpbin.org/delete";
+	Delete.mMethod = ofxCurl::HTTP_DELETE;
+	Delete.mParameterString = "";
+	mCurl->addHTTPRequest(Delete);
 
-	std::cout << "Testing HEAD request.." << std::endl;
-	std::string head_result = mCurl->head("http://www.httpbin.org/head");
-	std::printf("Message received: \n %s", head_result.c_str());
+	ofxCurl::HTTPRequest Head;
+	Head.mUrl = "http://www.httpbin.org/head";
+	Head.mMethod = ofxCurl::HTTP_HEAD;
+	Head.mParameterString = "";
+	mCurl->addHTTPRequest(Head);
+
 }
 
 //--------------------------------------------------------------

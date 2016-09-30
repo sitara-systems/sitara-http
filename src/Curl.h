@@ -69,6 +69,7 @@ namespace ofxCurl {
 		std::string mUserAgent;
 		std::vector<char> mErrorBuffer;
 		std::queue<HTTPRequest> mRequestQueue;
+		static const int MAX_WAIT_MSECS = 30000;
 	};
 
 }
