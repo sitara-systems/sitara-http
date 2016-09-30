@@ -5,7 +5,7 @@ void ofApp::setup(){
 	mCurl = ofxCurl::Curl::make();
 
 	std::map<std::string, std::string> searchParameters;
-	searchParameters["q"] = "bernie sanders";
+	searchParameters["q"] = "midnight commercial";
 	std::string result = mCurl->post("http://www.google.com/search?", searchParameters);
 	std::printf("Message received: \n %s", result.c_str());
 }

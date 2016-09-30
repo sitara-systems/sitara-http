@@ -12,6 +12,7 @@
 *.so
 *.dylib
 *.dll
+!libcurl.dll
 
 # Fortran module files
 *.mod
@@ -21,6 +22,8 @@
 *.la
 *.a
 *.lib
+!libcurl.lib
+!libcurl_a.lib
 
 # Executables
 *.exe
