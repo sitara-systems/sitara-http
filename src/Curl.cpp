@@ -8,16 +8,81 @@ std::shared_ptr<Curl> Curl::make() {
 }
 
 Curl::Curl() : mErrorBuffer(CURL_ERROR_SIZE) {
+	mMaxNumberOfThreads = 5;
+	mCurrentNumberOfThreads = 0;
 	curl_global_init(CURL_GLOBAL_ALL);
-	mCurl = curl_easy_init();
+	mMultiCurl = curl_multi_init();
+	curl_multi_setopt(mMultiCurl, CURLMOPT_MAXCONNECTS, mMaxNumberOfThreads);
 	mOutputBuffer = "";
 	mErrorBuffer[0] = 0;
 	mUserAgent = "Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)";
+	mUpdateThread = std::thread(&Curl::updateThreads, this);
 }
 
 Curl::~Curl() {
-	curl_easy_cleanup(mCurl);
+	curl_multi_cleanup(mMultiCurl);
 	curl_global_cleanup();
+}
+
+void Curl::addHTTPRequest(const HTTPRequest request) {
+	mRequestQueue.push(request);
+}
+
+size_t Curl::getNumberOfRequests() {
+	return mRequestQueue.size();
+}
+
+void Curl::setMaxNumberOfThreads(int numThreads) {
+	mMaxNumberOfThreads = numThreads;
+}
+
+int Curl::getMaxNumberOfThreads() {
+	return mMaxNumberOfThreads;
+}
+
+void Curl::setUserAgent(const std::string &agent) {
+	mUserAgent = agent;
+}
+
+std::string ofxCurl::Curl::mapToString(const std::map<std::string, std::string> map) {
+	std::string output = "";
+
+	for (auto it = map.begin(); it != map.end(); ++it) {
+		if (it != map.begin()) {
+			output += "&";
+		}
+		std::string key = curl_easy_escape(mCurl, it->first.c_str(), 0);
+		std::string value = curl_easy_escape(mCurl, it->second.c_str(), 0);
+		output += key;
+		output += "=";
+		output += value;
+	}
+
+	return output;
+}
+
+void Curl::makeStringSafe(std::string input) {
+	input = curl_easy_escape(mCurl, input.c_str(), 0);
+}
+
+void Curl::updateThreads() {
+	while (true) {
+		while (mCurrentNumberOfThreads < mMaxNumberOfThreads && mRequestQueue.size() > 0) {
+			loadRequest();
+		}
+		curl_multi_perform(mMultiCurl, &mCurrentNumberOfThreads);
+	}
+}
+
+void Curl::loadRequest() {
+	HTTPRequest request = mRequestQueue.front();
+	
+	CURL* c = curl_easy_init();
+	setOptions(c);
+
+	curl_multi_add_handle(mMultiCurl, c);
+
+	mRequestQueue.pop();
 }
 
 std::string Curl::post(const std::string &url, const std::map<std::string, std::string> &parameters) {
@@ -167,41 +232,16 @@ std::string Curl::easyPerform(const std::string& url, HTTPMethod method, const s
 	}
 }
 
-void Curl::setUserAgent(const std::string &agent) {
-	mUserAgent = agent;
-}
-
-std::string ofxCurl::Curl::mapToString(const std::map<std::string, std::string> map) {
-	std::string output = "";
-
-	for (auto it = map.begin(); it != map.end(); ++it) {
-		if (it != map.begin()) {
-			output += "&";
-		}
-		std::string key = curl_easy_escape(mCurl, it->first.c_str(), 0);
-		std::string value = curl_easy_escape(mCurl, it->second.c_str(), 0);
-		output += key;
-		output += "=";
-		output += value;
-	}
-
-	return output;
-}
-
-void Curl::makeStringSafe(std::string input) {
-	input = curl_easy_escape(mCurl, input.c_str(), 0);
-}
-
-void Curl::setOptions() {
-	curl_easy_setopt(mCurl, CURLOPT_ERRORBUFFER, mErrorBuffer);
-	curl_easy_setopt(mCurl, CURLOPT_HEADER, 0);
-	curl_easy_setopt(mCurl, CURLOPT_FOLLOWLOCATION, 1);
-	curl_easy_setopt(mCurl, CURLOPT_WRITEFUNCTION, &writeCallback);
+void Curl::setOptions(CURL* curl) {
+	curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, mErrorBuffer);
+	curl_easy_setopt(curl, CURLOPT_HEADER, 0);
+	curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1);
+	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &writeCallback);
 	mOutputBuffer.clear();
-	curl_easy_setopt(mCurl, CURLOPT_WRITEDATA, &mOutputBuffer);
-	curl_easy_setopt(mCurl, CURLOPT_SSL_VERIFYHOST, 2);
-	curl_easy_setopt(mCurl, CURLOPT_USERAGENT, mUserAgent.c_str());
-	curl_easy_setopt(mCurl, CURLOPT_SSL_VERIFYPEER, 0); // this line makes it work under https
+	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &mOutputBuffer);
+	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2);
+	curl_easy_setopt(curl, CURLOPT_USERAGENT, mUserAgent.c_str());
+	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0); // this line makes it work under https
 }
 
 size_t Curl::writeCallback(const char* contents, size_t size, size_t nmemb, std::string* buffer) {
