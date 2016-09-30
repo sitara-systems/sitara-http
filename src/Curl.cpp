@@ -99,8 +99,11 @@ std::string Curl::get(char* url) {
 
 std::string Curl::easyPerform(std::string& url, bool post, std::string &postParamString) {
 	if (!mCurl) {
-		return "";
+		return "ofxCurl ERROR: Curl hasn't been instantiated!";
 	}
+
+	CURL* request = NULL;
+	request = curl_easy_init();
 
 	setOptions();
 
