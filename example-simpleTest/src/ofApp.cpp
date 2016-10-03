@@ -7,11 +7,15 @@ void ofApp::setup(){
 	std::map<std::string, std::string> requestParameters;
 	requestParameters["foo"] = "bar baz";
 
+	std::printf("Loading GET request...\n");
+
 	ofxCurl::HTTPRequest Get;
 	Get.mUrl = "http://www.httpbin.org/get";
 	Get.mMethod = ofxCurl::HTTP_GET;
 	Get.mParameterString = "";
 	mCurl->addHTTPRequest(Get);
+
+	std::printf("Loading POST request...\n");
 
 	ofxCurl::HTTPRequest Post;
 	Post.mUrl = "http://www.httpbin.org/post";
@@ -19,17 +23,23 @@ void ofApp::setup(){
 	Post.mParameterString = "";
 	mCurl->addHTTPRequest(Post);
 
+	std::printf("Loading PUT request...\n");
+
 	ofxCurl::HTTPRequest Put;
 	Put.mUrl = "http://www.httpbin.org/put";
 	Put.mMethod = ofxCurl::HTTP_PUT;
 	Put.mParameterString = "";
 	mCurl->addHTTPRequest(Put);
 
+	std::printf("Loading DELETE request...\n");
+
 	ofxCurl::HTTPRequest Delete;
 	Delete.mUrl = "http://www.httpbin.org/delete";
 	Delete.mMethod = ofxCurl::HTTP_DELETE;
 	Delete.mParameterString = "";
 	mCurl->addHTTPRequest(Delete);
+
+	std::printf("Loading HEAD request...\n");
 
 	ofxCurl::HTTPRequest Head;
 	Head.mUrl = "http://www.httpbin.org/head";

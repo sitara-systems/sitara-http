@@ -51,8 +51,8 @@ std::string ofxCurl::Curl::mapToString(const std::map<std::string, std::string> 
 		if (it != map.begin()) {
 			output += "&";
 		}
-		std::string key = curl_easy_escape(mCurl, it->first.c_str(), 0);
-		std::string value = curl_easy_escape(mCurl, it->second.c_str(), 0);
+		std::string key = curl_easy_escape(mMultiCurl, it->first.c_str(), 0);
+		std::string value = curl_easy_escape(mMultiCurl, it->second.c_str(), 0);
 		output += key;
 		output += "=";
 		output += value;
@@ -62,7 +62,7 @@ std::string ofxCurl::Curl::mapToString(const std::map<std::string, std::string> 
 }
 
 void Curl::makeStringSafe(std::string input) {
-	input = curl_easy_escape(mCurl, input.c_str(), 0);
+	input = curl_easy_escape(mMultiCurl, input.c_str(), 0);
 }
 
 void Curl::updateThreads() {
@@ -79,42 +79,37 @@ void Curl::updateThreads() {
 			curl_multi_perform(mMultiCurl, &mCurrentNumberOfThreads);
 		} while (mCurrentNumberOfThreads);
 
-		CURLMsg* msg = NULL;
-		CURLcode return_code;
-		int msgs_left = 0;
-		int http_status_code;
-		const char *szUrl;
-		CURL* curl_instance;
+		CURLMsg* message = NULL;
+		int  messagesRemaining = 0;
 
-		while ((msg = curl_multi_info_read(mMultiCurl, &msgs_left))) {
-			if (msg->msg == CURLMSG_DONE) {
-				curl_instance = msg->easy_handle;
+		while ((message = curl_multi_info_read(mMultiCurl, &messagesRemaining))) {
+			if (message->msg == CURLMSG_DONE) {
+				
+				CURL* curlInstance;
+				curlInstance = message->easy_handle;
 
-				return_code = msg->data.result;
-				if (return_code != CURLE_OK) {
-					std::printf("CURL error code: %d\n", msg->data.result);
+				CURLcode returnCode;
+				returnCode = message->data.result;
+
+				if (returnCode != CURLE_OK) {
+					std::printf("CURL error code: %d\n", message->data.result);
 					continue;
 				}
 
-				// Get HTTP status code
-				http_status_code = 0;
-				szUrl = NULL;
+				// Get information about the call we just made
+				long responseCode = 0;
+				char* url = "";
 
-				curl_easy_getinfo(curl_instance, CURLINFO_RESPONSE_CODE, &http_status_code);
-				curl_easy_getinfo(curl_instance, CURLINFO_PRIVATE, &szUrl);
+				curl_easy_getinfo(curlInstance, CURLINFO_RESPONSE_CODE, &responseCode);
+				curl_easy_getinfo(curlInstance, CURLINFO_EFFECTIVE_URL, &url);
 
-				if (http_status_code == 200) {
-					std::printf("200 OK for %s\n", szUrl);
-				}
-				else {
-					std::printf("GET of %s returned http status code %d\n", szUrl, http_status_code);
-				}
+				std::printf("ofxCurl::updateThreads HTTP Request returned HTTP/1.1 %d for %s\n", responseCode, url);
 
-				curl_multi_remove_handle(mMultiCurl, curl_instance);
-				curl_easy_cleanup(curl_instance);
+				curl_multi_remove_handle(mMultiCurl, curlInstance);
+				curl_easy_cleanup(curlInstance);
 			}
 			else {
-				fprintf(stderr, "error: after curl_multi_info_read(), CURLMsg=%d\n", msg->msg);
+				fprintf(stderr, "error: after curl_multi_info_read(), CURLMsg=%d\n", message->msg);
 			}
 		}
 
@@ -125,161 +120,15 @@ void Curl::loadRequest() {
 	HTTPRequest request = mRequestQueue.front();
 			
 	CURL* c = curl_easy_init();
-	setOptions(c);
+	setOptions(c, request);
 
 	curl_multi_add_handle(mMultiCurl, c);
 
 	mRequestQueue.pop();
 }
 
-std::string Curl::post(const std::string &url, const std::map<std::string, std::string> &parameters) {
-	std::string paramString = mapToString(parameters);
+void Curl::setOptions(CURL* curl, HTTPRequest request) {
 
-	return easyPerform(url, HTTP_POST, paramString);
-}
-
-std::string Curl::post(const std::string &url, const std::string &parameters) {
-	return easyPerform(url, HTTP_POST, parameters);
-}
-
-std::string Curl::post(const char* url, const std::map<std::string, std::string> &parameters) {
-	std::string paramString = mapToString(parameters);
-
-	std::string newUrl(url);
-
-	return easyPerform(newUrl, HTTP_POST, paramString);
-}
-
-std::string Curl::post(const char* url, const std::string &parameters) {
-	std::string newUrl(url);
-
-	return easyPerform(newUrl, HTTP_POST, parameters);
-}
-
-std::string Curl::put(const std::string &url, const std::map<std::string, std::string> &parameters) {
-	std::string paramString = mapToString(parameters);
-
-	return easyPerform(url, HTTP_PUT, paramString);
-}
-
-std::string Curl::put(const std::string &url, const std::string &parameters) {
-	return easyPerform(url, HTTP_PUT, parameters);
-}
-
-std::string Curl::put(const char* url, const std::map<std::string, std::string> &parameters) {
-	std::string paramString = mapToString(parameters);
-
-	std::string newUrl(url);
-
-	return easyPerform(newUrl, HTTP_PUT, paramString);
-}
-
-std::string Curl::put(const char* url, const std::string &parameters) {
-	std::string newUrl(url);
-
-	return easyPerform(newUrl, HTTP_PUT, parameters);
-}
-
-std::string Curl::get(const std::string &url, const std::map<std::string, std::string> &parameters) {
-	std::string paramString = mapToString(parameters);
-	return easyPerform(url, HTTP_GET, paramString);
-}
-
-std::string Curl::get(const std::string &url, const std::string &parameters) {
-	return easyPerform(url, HTTP_GET, parameters);
-}
-
-std::string Curl::get(const std::string &url) {
-	return easyPerform(url, HTTP_GET, std::string(""));
-}
-
-std::string Curl::get(const char* url, const std::map<std::string, std::string> &parameters) {
-	std::string paramString = mapToString(parameters);
-	std::string newUrl(url);
-
-	return easyPerform(newUrl, HTTP_GET, paramString);
-}
-
-std::string Curl::get(const char* url, const std::string &parameters) {
-	std::string newUrl(url);
-
-	return easyPerform(newUrl, HTTP_GET, parameters);
-}
-
-std::string Curl::get(const char* url) {
-	std::string newUrl(url);
-
-	return easyPerform(newUrl, HTTP_GET, std::string(""));
-}
-
-std::string Curl::del(const std::string &url) {
-	return easyPerform(url, HTTP_DELETE, std::string(""));
-}
-
-std::string Curl::del(const char* url) {
-	std::string newUrl(url);
-
-	return easyPerform(newUrl, HTTP_DELETE, std::string(""));
-}
-
-std::string Curl::head(const std::string &url) {
-	return easyPerform(url, HTTP_HEAD, std::string(""));
-}
-
-std::string Curl::head(const char* url) {
-	std::string newUrl(url);
-
-	return easyPerform(newUrl, HTTP_HEAD, std::string(""));
-}
-
-std::string Curl::easyPerform(const std::string& url, HTTPMethod method, const std::string &postParamString) {
-	if (!mCurl) {
-		return "ofxCurl ERROR: Curl hasn't been instantiated!";
-	}
-
-	setOptions();
-
-	curl_easy_setopt(mCurl, CURLOPT_URL, url.c_str());
-
-	std::string param_url = url + "?" + postParamString;
-
-	switch (method) {
-		case HTTP_POST:
-			curl_easy_setopt(mCurl, CURLOPT_POST, 1);
-			curl_easy_setopt(mCurl, CURLOPT_POSTFIELDS, postParamString.c_str());
-			curl_easy_setopt(mCurl, CURLOPT_URL, url.c_str());
-			break;
-		case HTTP_GET:
-			curl_easy_setopt(mCurl, CURLOPT_URL, param_url.c_str());
-			break;
-		case HTTP_PUT:
-			curl_easy_setopt(mCurl, CURLOPT_CUSTOMREQUEST, "PUT");
-			curl_easy_setopt(mCurl, CURLOPT_URL, url.c_str());
-			break;
-		case HTTP_DELETE:
-			curl_easy_setopt(mCurl, CURLOPT_CUSTOMREQUEST, "DELETE");
-			curl_easy_setopt(mCurl, CURLOPT_URL, url.c_str());
-			curl_easy_setopt(mCurl, CURLOPT_POSTFIELDS, postParamString.c_str());
-			break;
-		case HTTP_HEAD:
-			curl_easy_setopt(mCurl, CURLOPT_NOBODY, 1);
-			curl_easy_setopt(mCurl, CURLOPT_URL, url.c_str());
-		default:
-			break;
-	}
-
-	CURLcode curlResult = curl_easy_perform(mCurl);
-
-	if (curlResult == CURLE_OK) {
-		return mOutputBuffer;
-	}
-	else {
-		std::printf("ofxCurl ERROR: %s", mErrorBuffer.data());
-		return "";
-	}
-}
-
-void Curl::setOptions(CURL* curl) {
 	curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, mErrorBuffer);
 	curl_easy_setopt(curl, CURLOPT_HEADER, 0);
 	curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1);
@@ -289,6 +138,42 @@ void Curl::setOptions(CURL* curl) {
 	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2);
 	curl_easy_setopt(curl, CURLOPT_USERAGENT, mUserAgent.c_str());
 	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0); // this line makes it work under https
+
+	if (!mMultiCurl) {
+		std::printf("ofxCurl ERROR: Curl hasn't been instantiated!");
+	}
+
+	std::string param_url = request.mUrl + "?" + request.mParameterString;
+
+	switch (request.mMethod) {
+	case HTTP_POST:
+		curl_easy_setopt(curl, CURLOPT_POST, 1);
+		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, request.mParameterString.c_str());
+		curl_easy_setopt(curl, CURLOPT_URL, request.mUrl.c_str());
+		break;
+	case HTTP_GET:
+		if (!request.mParameterString.empty()) {
+			curl_easy_setopt(curl, CURLOPT_URL, param_url.c_str());
+		}
+		else {
+			curl_easy_setopt(curl, CURLOPT_URL, request.mUrl.c_str());
+		}
+		break;
+	case HTTP_PUT:
+		curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
+		curl_easy_setopt(curl, CURLOPT_URL, request.mUrl.c_str());
+		break;
+	case HTTP_DELETE:
+		curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "DELETE");
+		curl_easy_setopt(curl, CURLOPT_URL, request.mUrl.c_str());
+		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, request.mParameterString.c_str());
+		break;
+	case HTTP_HEAD:
+		curl_easy_setopt(curl, CURLOPT_NOBODY, 1);
+		curl_easy_setopt(curl, CURLOPT_URL, request.mUrl.c_str());
+	default:
+		break;
+	}
 }
 
 size_t Curl::writeCallback(const char* contents, size_t size, size_t nmemb, std::string* buffer) {
