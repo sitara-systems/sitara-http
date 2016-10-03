@@ -12,7 +12,8 @@ void ofApp::setup(){
 	ofxCurl::HTTPRequest Get;
 	Get.mUrl = "http://www.httpbin.org/get";
 	Get.mMethod = ofxCurl::HTTP_GET;
-	Get.mParameterString = "";
+	Get.mParameterString = mCurl->mapToString(requestParameters);
+	Get.mCallback = [=](ofxCurl::HTTPResponse* response) { std::printf("Request complete with code %d; response was %s.\n", response->mResponseCode, response->mBody.asCString()); };
 	mCurl->addHTTPRequest(Get);
 
 	std::printf("Loading POST request...\n");
@@ -21,6 +22,7 @@ void ofApp::setup(){
 	Post.mUrl = "http://www.httpbin.org/post";
 	Post.mMethod = ofxCurl::HTTP_POST;
 	Post.mParameterString = "";
+	Post.mCallback = [=](ofxCurl::HTTPResponse* response) { std::printf("Request complete with code %d; response was %s.\n", response->mResponseCode, response->mBody.asCString()); };
 	mCurl->addHTTPRequest(Post);
 
 	std::printf("Loading PUT request...\n");
@@ -29,6 +31,7 @@ void ofApp::setup(){
 	Put.mUrl = "http://www.httpbin.org/put";
 	Put.mMethod = ofxCurl::HTTP_PUT;
 	Put.mParameterString = "";
+	Put.mCallback = [=](ofxCurl::HTTPResponse* response) { std::printf("Request complete with code %d; response was %s.\n", response->mResponseCode, response->mBody.asCString()); };
 	mCurl->addHTTPRequest(Put);
 
 	std::printf("Loading DELETE request...\n");
@@ -37,6 +40,7 @@ void ofApp::setup(){
 	Delete.mUrl = "http://www.httpbin.org/delete";
 	Delete.mMethod = ofxCurl::HTTP_DELETE;
 	Delete.mParameterString = "";
+	Delete.mCallback = [=](ofxCurl::HTTPResponse* response) { std::printf("Request complete with code %d; response was %s.\n", response->mResponseCode, response->mBody.asCString()); };
 	mCurl->addHTTPRequest(Delete);
 
 	std::printf("Loading HEAD request...\n");
@@ -45,13 +49,13 @@ void ofApp::setup(){
 	Head.mUrl = "http://www.httpbin.org/head";
 	Head.mMethod = ofxCurl::HTTP_HEAD;
 	Head.mParameterString = "";
+	Head.mCallback = [=](ofxCurl::HTTPResponse* response) { std::printf("Request complete with code %d; response was %s.\n", response->mResponseCode, response->mBody.asCString()); };
 	mCurl->addHTTPRequest(Head);
 
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
-
 }
 
 //--------------------------------------------------------------

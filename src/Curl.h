@@ -7,6 +7,7 @@
 #include <thread>
 #include <memory>
 #include <iostream>
+#include "json/json.h"
 #include "curl/curl.h"
 
 namespace ofxCurl {
@@ -19,10 +20,22 @@ namespace ofxCurl {
 		HTTP_HEAD
 	};
 
+	struct HTTPResponse;
+
 	struct HTTPRequest {
 		HTTPMethod mMethod;
 		std::string mUrl;
 		std::string mParameterString;
+		std::function<void(HTTPResponse*)> mCallback;
+	};
+
+	struct HTTPResponse {
+		long mResponseCode;
+		std::string mContentType;
+		Json::Value mBody;
+		Json::Value mHeaders;
+		double mDataSize;
+		HTTPRequest mRequest;
 	};
 
 	class Curl {
@@ -43,12 +56,13 @@ namespace ofxCurl {
 		void setOptions(CURL* curl, HTTPRequest request);
 		static size_t writeCallback(const char* contents, size_t size, size_t nmemb, std::string* buffer);
 		CURL* mMultiCurl;
+		Json::Reader mJsonReader;
 		int mMaxNumberOfThreads;
 		int mCurrentNumberOfThreads;
-		std::thread mUpdateThread;
 		std::string mOutputBuffer;
+		std::thread mUpdateThread;
 		std::string mUserAgent;
-		std::vector<char> mErrorBuffer;
+		std::map<CURL*, HTTPRequest> mHandleMap;
 		std::queue<HTTPRequest> mRequestQueue;
 		static const int MAX_WAIT_MSECS = 30000;
 	};

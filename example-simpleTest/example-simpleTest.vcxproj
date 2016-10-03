@@ -173,11 +173,14 @@
     <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\libs\jsoncpp\src\jsoncpp.cpp" />
     <ClCompile Include="..\src\Curl.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\ofApp.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\libs\jsoncpp\include\json\json-forwards.h" />
+    <ClInclude Include="..\libs\jsoncpp\include\json\json.h" />
     <ClInclude Include="..\src\Curl.h" />
     <ClInclude Include="..\src\ofxCurl.h" />
     <ClInclude Include="src\ofApp.h" />

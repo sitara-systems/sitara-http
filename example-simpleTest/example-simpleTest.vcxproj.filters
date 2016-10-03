@@ -10,6 +10,9 @@
     <ClCompile Include="..\src\Curl.cpp">
       <Filter>addons\ofxCurl\src</Filter>
     </ClCompile>
+    <ClCompile Include="..\libs\jsoncpp\src\jsoncpp.cpp">
+      <Filter>addons\ofxCurl\libs\jsoncpp\src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -35,6 +38,15 @@
     </Filter>
     <Filter Include="addons\ofxCurl\src">
       <UniqueIdentifier>{dece71ae-8d5c-40e9-ab3b-070fae97219a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxCurl\libs\jsoncpp">
+      <UniqueIdentifier>{fc0fd03e-2ffd-48ad-8a44-4e6b043ab3ea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxCurl\libs\jsoncpp\include">
+      <UniqueIdentifier>{b2b681a7-d245-4a6b-9db4-380a36870874}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxCurl\libs\jsoncpp\src">
+      <UniqueIdentifier>{e54936c3-1398-4ae5-b4dc-fdfd609ef931}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -73,6 +85,12 @@
     </ClInclude>
     <ClInclude Include="..\src\ofxCurl.h">
       <Filter>addons\ofxCurl\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libs\jsoncpp\include\json\json.h">
+      <Filter>addons\ofxCurl\libs\jsoncpp\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libs\jsoncpp\include\json\json-forwards.h">
+      <Filter>addons\ofxCurl\libs\jsoncpp\include</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

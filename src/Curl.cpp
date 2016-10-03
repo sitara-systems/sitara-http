@@ -7,14 +7,12 @@ std::shared_ptr<Curl> Curl::make() {
 	return curl;
 }
 
-Curl::Curl() : mErrorBuffer(CURL_ERROR_SIZE) {
-	mMaxNumberOfThreads = 5;
+Curl::Curl() {
+	mMaxNumberOfThreads = 15;
 	mCurrentNumberOfThreads = 0;
 	curl_global_init(CURL_GLOBAL_ALL);
 	mMultiCurl = curl_multi_init();
 	curl_multi_setopt(mMultiCurl, CURLMOPT_MAXCONNECTS, mMaxNumberOfThreads);
-	mOutputBuffer = "";
-	mErrorBuffer[0] = 0;
 	mUserAgent = "Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)";
 	mUpdateThread = std::thread(&Curl::updateThreads, this);
 }
@@ -24,8 +22,11 @@ Curl::~Curl() {
 	curl_global_cleanup();
 }
 
-void Curl::addHTTPRequest(const HTTPRequest request) {
+void Curl::addHTTPRequest(HTTPRequest request) {
 	mRequestQueue.push(request);
+
+	HTTPResponse response;
+	response.mRequest = request;
 }
 
 size_t Curl::getNumberOfRequests() {
@@ -34,6 +35,7 @@ size_t Curl::getNumberOfRequests() {
 
 void Curl::setMaxNumberOfThreads(int numThreads) {
 	mMaxNumberOfThreads = numThreads;
+	curl_multi_setopt(mMultiCurl, CURLMOPT_MAXCONNECTS, mMaxNumberOfThreads);
 }
 
 int Curl::getMaxNumberOfThreads() {
@@ -44,7 +46,7 @@ void Curl::setUserAgent(const std::string &agent) {
 	mUserAgent = agent;
 }
 
-std::string ofxCurl::Curl::mapToString(const std::map<std::string, std::string> map) {
+std::string Curl::mapToString(const std::map<std::string, std::string> map) {
 	std::string output = "";
 
 	for (auto it = map.begin(); it != map.end(); ++it) {
@@ -96,17 +98,27 @@ void Curl::updateThreads() {
 					continue;
 				}
 
-				// Get information about the call we just made
-				long responseCode = 0;
-				char* url = "";
+				// Write information from the request to a HTTPResponse object
+				HTTPResponse response;
+				response.mRequest = mHandleMap[curlInstance];
 
-				curl_easy_getinfo(curlInstance, CURLINFO_RESPONSE_CODE, &responseCode);
-				curl_easy_getinfo(curlInstance, CURLINFO_EFFECTIVE_URL, &url);
+				curl_easy_getinfo(curlInstance, CURLINFO_RESPONSE_CODE, &response.mResponseCode);
+				curl_easy_getinfo(curlInstance, CURLINFO_CONTENT_TYPE, &response.mContentType);
+				curl_easy_getinfo(curlInstance, CURLINFO_SIZE_DOWNLOAD, &response.mDataSize);
 
-				std::printf("ofxCurl::updateThreads HTTP Request returned HTTP/1.1 %d for %s\n", responseCode, url);
+				Json::Value root;
+				mJsonReader.parse(mOutputBuffer, root);
+
+				//response.mHeaders = root["headers"];
+				response.mBody = root;
+				std::printf("%s\n", root.asString());
+
+				//std::printf("ofxCurl::updateThreads HTTP Request returned HTTP/1.1 %d for %s\n", responseCode, url);
+				mHandleMap[curlInstance].mCallback(&response);
 
 				curl_multi_remove_handle(mMultiCurl, curlInstance);
 				curl_easy_cleanup(curlInstance);
+				mOutputBuffer.clear();
 			}
 			else {
 				fprintf(stderr, "error: after curl_multi_info_read(), CURLMsg=%d\n", message->msg);
@@ -122,14 +134,14 @@ void Curl::loadRequest() {
 	CURL* c = curl_easy_init();
 	setOptions(c, request);
 
+	mHandleMap[c] = request;
+
 	curl_multi_add_handle(mMultiCurl, c);
 
 	mRequestQueue.pop();
 }
 
 void Curl::setOptions(CURL* curl, HTTPRequest request) {
-
-	curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, mErrorBuffer);
 	curl_easy_setopt(curl, CURLOPT_HEADER, 0);
 	curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1);
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &writeCallback);
