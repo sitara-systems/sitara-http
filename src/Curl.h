@@ -7,7 +7,7 @@
 #include <thread>
 #include <memory>
 #include <iostream>
-#include "json/json.h"
+#include "jsoncpp/json.h"
 #include "curl/curl.h"
 
 namespace ofxCurl {
