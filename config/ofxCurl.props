@@ -3,12 +3,11 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros">
     <CURL_ROOT>..\..\..\addons\ofxCurl\libs\libcurl</CURL_ROOT>
-    <JSON_ROOT>..\..\..\addons\ofxCurl\libs\jsoncpp</JSON_ROOT>
   </PropertyGroup>
   <PropertyGroup />
   <ItemDefinitionGroup>
     <ClCompile>
-      <AdditionalIncludeDirectories>$(JSON_ROOT)\include;$(OF_ROOT)\addons\ofxCurl\src;$(CURL_ROOT)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(OF_ROOT)\addons\ofxCurl\src;$(CURL_ROOT)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -23,9 +22,6 @@
     <BuildMacro Include="CURL_ROOT">
       <Value>$(CURL_ROOT)</Value>
       <EnvironmentVariable>true</EnvironmentVariable>
-    </BuildMacro>
-    <BuildMacro Include="JSON_ROOT">
-      <Value>$(JSON_ROOT)</Value>
     </BuildMacro>
   </ItemGroup>
 </Project>

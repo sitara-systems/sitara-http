@@ -20,21 +20,21 @@ namespace ofxCurl {
 		HTTP_HEAD
 	};
 
+	//forward declare
 	struct HTTPResponse;
+	class Curl;
 
 	struct HTTPRequest {
 		HTTPMethod mMethod;
 		std::string mUrl;
 		std::string mParameterString;
-		std::function<void(HTTPResponse*)> mCallback;
+		std::function<void(HTTPResponse*, ofxCurl::Curl*)> mCallback;
 	};
 
 	struct HTTPResponse {
 		long mResponseCode;
-		std::string mContentType;
 		Json::Value mBody;
 		Json::Value mHeaders;
-		double mDataSize;
 		HTTPRequest mRequest;
 	};
 
@@ -42,6 +42,7 @@ namespace ofxCurl {
 	public:
 		static std::shared_ptr<Curl> make();
 		~Curl();
+		HTTPResponse makeRequest(const HTTPRequest request);
 		void addHTTPRequest(const HTTPRequest request);
 		size_t getNumberOfRequests();
 		void setMaxNumberOfThreads(int numThreads);
@@ -49,17 +50,23 @@ namespace ofxCurl {
 		void setUserAgent(const std::string &agent);
 		std::string mapToString(const std::map<std::string, std::string> map);
 		void makeStringSafe(std::string input);
+		std::string MethodToString(HTTPMethod method);
+		std::string JsonToString(const Json::Value value);
 	protected:
 		Curl();
 		void updateThreads();
 		void loadRequest();
-		void setOptions(CURL* curl, HTTPRequest request);
+		void setOptions(CURL* curl, const HTTPRequest request);
+		void checkForErrors(CURLcode error_code);
+		void checkForMultiErrors(CURLMcode error_code);
 		static size_t writeCallback(const char* contents, size_t size, size_t nmemb, std::string* buffer);
 		CURL* mMultiCurl;
 		Json::Reader mJsonReader;
+		Json::StyledWriter mJsonWriter;
 		int mMaxNumberOfThreads;
 		int mCurrentNumberOfThreads;
 		std::string mOutputBuffer;
+		std::vector<char> mErrorBuffer;	
 		std::thread mUpdateThread;
 		std::string mUserAgent;
 		std::map<CURL*, HTTPRequest> mHandleMap;

@@ -1,0 +1,2 @@
+ofxCurl
+ofxJSON
