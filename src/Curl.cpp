@@ -46,7 +46,7 @@ HTTPResponse Curl::makeRequest(const HTTPRequest request) {
 }
 
 
-void Curl::addHTTPRequest(HTTPRequest request) {
+void Curl::addHTTPRequest(const HTTPRequest request) {
 	/*
 	Adds a non-blocking request to the request queue.  Requests will be made when a spot in the queue is available, and then the callback attached to the request object will be called.
 	*/
@@ -75,7 +75,7 @@ void Curl::setUserAgent(const std::string &agent) {
 	mUserAgent = agent;
 }
 
-std::string Curl::mapToString(const std::map<std::string, std::string> map) {
+std::string Curl::mapToString(const std::map<std::string, std::string> &map) {
 	std::string output = "";
 
 	for (auto it = map.begin(); it != map.end(); ++it) {
@@ -92,11 +92,11 @@ std::string Curl::mapToString(const std::map<std::string, std::string> map) {
 	return output;
 }
 
-void Curl::makeStringSafe(std::string input) {
+void Curl::makeStringSafe(std::string &input) {
 	input = curl_easy_escape(mMultiCurl, input.c_str(), 0);
 }
 
-std::string Curl::MethodToString(HTTPMethod method) {
+std::string Curl::MethodToString(const HTTPMethod &method) {
 	switch (method) {
 	case HTTP_DELETE:
 		return "DELETE";
@@ -113,7 +113,7 @@ std::string Curl::MethodToString(HTTPMethod method) {
 	}
 }
 
-std::string Curl::JsonToString(const Json::Value value) {
+std::string Curl::JsonToString(const Json::Value &value) {
 	std::string output = mJsonWriter.write(value);
 	return output;
 }
@@ -258,14 +258,14 @@ void Curl::setOptions(CURL* curl, const HTTPRequest request) {
 	}
 }
 
-void Curl::checkForErrors(CURLcode error_code) {
+void Curl::checkForErrors(const CURLcode error_code) {
 	std::string errorString = curl_easy_strerror(error_code);
 	if (error_code != CURLE_OK) {
 		std::printf("ofxCurl::Curl ERROR: cURL failed: %s\n", errorString.c_str());
 	}
 }
 
-void Curl::checkForMultiErrors(CURLMcode error_code) {
+void Curl::checkForMultiErrors(const CURLMcode error_code) {
 	std::string errorString = curl_multi_strerror(error_code);
 	if (error_code != CURLM_OK) {
 		std::printf("ofxCurl::Curl ERROR: multi-cURL failed: %s\n", errorString.c_str());

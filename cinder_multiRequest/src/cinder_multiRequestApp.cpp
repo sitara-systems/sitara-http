@@ -8,16 +8,18 @@ using namespace ci::app;
 using namespace std;
 
 class cinder_multiRequestApp : public App {
-  public:
+public:
 	void setup() override;
-	void mouseDown( MouseEvent event ) override;
+	void mouseDown(MouseEvent event) override;
 	void update() override;
 	void draw() override;
 
 	std::shared_ptr<ofxCurl::Curl> mCurl;
+	double mTime;
 };
 
 void cinder_multiRequestApp::setup() {
+	mTime = cinder::app::getElapsedSeconds();
 
 	mCurl = ofxCurl::Curl::make();
 
@@ -70,17 +72,30 @@ void cinder_multiRequestApp::setup() {
 
 }
 
-void cinder_multiRequestApp::mouseDown( MouseEvent event )
+void cinder_multiRequestApp::mouseDown(MouseEvent event)
 {
 }
 
 void cinder_multiRequestApp::update()
 {
+	if (cinder::app::getElapsedFrames() % 300 == 0) {
+		std::printf("Sending new GET request at %f\n", cinder::app::getElapsedSeconds() - mTime);
+
+		std::map<std::string, std::string> requestParameters;
+		requestParameters["foo"] = "bar baz";
+
+		ofxCurl::HTTPRequest Get;
+		Get.mUrl = "http://www.httpbin.org/get";
+		Get.mMethod = ofxCurl::HTTP_GET;
+		Get.mParameterString = mCurl->mapToString(requestParameters);
+		Get.mCallback = [=](ofxCurl::HTTPResponse* response, ofxCurl::Curl* curl) { std::printf("Request complete with code %d; headers are %s\n", response->mResponseCode, curl->JsonToString(response->mHeaders).c_str()); };
+		mCurl->addHTTPRequest(Get);
+	}
 }
 
 void cinder_multiRequestApp::draw()
 {
-	gl::clear( Color( 0, 0, 0 ) ); 
+	gl::clear(Color(0, 0, 0));
 }
 
 CINDER_APP(cinder_multiRequestApp, RendererGl, [=](cinder::app::App::Settings* settings) {settings->setConsoleWindowEnabled(); })

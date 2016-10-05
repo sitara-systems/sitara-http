@@ -48,17 +48,17 @@ namespace ofxCurl {
 		void setMaxNumberOfThreads(int numThreads);
 		int getMaxNumberOfThreads();
 		void setUserAgent(const std::string &agent);
-		std::string mapToString(const std::map<std::string, std::string> map);
-		void makeStringSafe(std::string input);
-		std::string MethodToString(HTTPMethod method);
-		std::string JsonToString(const Json::Value value);
+		std::string mapToString(const std::map<std::string, std::string> &map);
+		void makeStringSafe(std::string &input);
+		std::string MethodToString(const HTTPMethod &method);
+		std::string JsonToString(const Json::Value &value);
 	protected:
 		Curl();
 		void updateThreads();
 		void loadRequest();
 		void setOptions(CURL* curl, const HTTPRequest request);
-		void checkForErrors(CURLcode error_code);
-		void checkForMultiErrors(CURLMcode error_code);
+		void checkForErrors(const CURLcode error_code);
+		void checkForMultiErrors(const CURLMcode error_code);
 		static size_t writeCallback(const char* contents, size_t size, size_t nmemb, std::string* buffer);
 		CURL* mMultiCurl;
 		Json::Reader mJsonReader;
