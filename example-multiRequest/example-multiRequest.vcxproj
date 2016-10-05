@@ -21,7 +21,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{7FD42DF7-442E-479A-BA76-D0022F99702A}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>example-simpleTest</RootNamespace>
+    <RootNamespace>example-multiRequest</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -97,7 +97,7 @@
       <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);..\..\..\addons\ofxCurl\libs;..\..\..\addons\ofxCurl\libs\libcurl;..\..\..\addons\ofxCurl\libs\libcurl\dlls;..\..\..\addons\ofxCurl\libs\libcurl\include;..\..\..\addons\ofxCurl\libs\libcurl\include\curl;..\..\..\addons\ofxCurl\libs\libcurl\lib;..\..\..\addons\ofxCurl\src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);..\..\..\addons\ofxCurl\libs;..\..\..\addons\ofxCurl\libs\libcurl;..\..\..\addons\ofxCurl\libs\libcurl\dlls;..\..\..\addons\ofxCurl\libs\libcurl\include;..\..\..\addons\ofxCurl\libs\libcurl\include\curl;..\..\..\addons\ofxCurl\libs\libcurl\lib;..\..\..\addons\ofxCurl\src;..\..\..\addons\ofxJSON\libs;..\..\..\addons\ofxJSON\libs\jsoncpp;..\..\..\addons\ofxJSON\libs\jsoncpp\include;..\..\..\addons\ofxJSON\libs\jsoncpp\include\json;..\..\..\addons\ofxJSON\libs\jsoncpp\src;..\..\..\addons\ofxJSON\src</AdditionalIncludeDirectories>
       <CompileAs>CompileAsCpp</CompileAs>
     </ClCompile>
     <Link>
@@ -116,7 +116,7 @@
       <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);..\..\..\addons\ofxCurl\libs;..\..\..\addons\ofxCurl\libs\libcurl;..\..\..\addons\ofxCurl\libs\libcurl\dlls;..\..\..\addons\ofxCurl\libs\libcurl\include;..\..\..\addons\ofxCurl\libs\libcurl\include\curl;..\..\..\addons\ofxCurl\libs\libcurl\lib;..\..\..\addons\ofxCurl\src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);..\..\..\addons\ofxCurl\libs;..\..\..\addons\ofxCurl\libs\libcurl;..\..\..\addons\ofxCurl\libs\libcurl\dlls;..\..\..\addons\ofxCurl\libs\libcurl\include;..\..\..\addons\ofxCurl\libs\libcurl\include\curl;..\..\..\addons\ofxCurl\libs\libcurl\lib;..\..\..\addons\ofxCurl\src;..\..\..\addons\ofxJSON\libs;..\..\..\addons\ofxJSON\libs\jsoncpp;..\..\..\addons\ofxJSON\libs\jsoncpp\include;..\..\..\addons\ofxJSON\libs\jsoncpp\include\json;..\..\..\addons\ofxJSON\libs\jsoncpp\src;..\..\..\addons\ofxJSON\src</AdditionalIncludeDirectories>
       <CompileAs>CompileAsCpp</CompileAs>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -135,7 +135,7 @@
       <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);..\..\..\addons\ofxCurl\libs;..\..\..\addons\ofxCurl\libs\libcurl;..\..\..\addons\ofxCurl\libs\libcurl\dlls;..\..\..\addons\ofxCurl\libs\libcurl\include;..\..\..\addons\ofxCurl\libs\libcurl\include\curl;..\..\..\addons\ofxCurl\libs\libcurl\lib;..\..\..\addons\ofxCurl\src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);..\..\..\addons\ofxCurl\libs;..\..\..\addons\ofxCurl\libs\libcurl;..\..\..\addons\ofxCurl\libs\libcurl\dlls;..\..\..\addons\ofxCurl\libs\libcurl\include;..\..\..\addons\ofxCurl\libs\libcurl\include\curl;..\..\..\addons\ofxCurl\libs\libcurl\lib;..\..\..\addons\ofxCurl\src;..\..\..\addons\ofxJSON\libs;..\..\..\addons\ofxJSON\libs\jsoncpp;..\..\..\addons\ofxJSON\libs\jsoncpp\include;..\..\..\addons\ofxJSON\libs\jsoncpp\include\json;..\..\..\addons\ofxJSON\libs\jsoncpp\src;..\..\..\addons\ofxJSON\src</AdditionalIncludeDirectories>
       <CompileAs>CompileAsCpp</CompileAs>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -157,7 +157,7 @@
       <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);..\..\..\addons\ofxCurl\libs;..\..\..\addons\ofxCurl\libs\libcurl;..\..\..\addons\ofxCurl\libs\libcurl\dlls;..\..\..\addons\ofxCurl\libs\libcurl\include;..\..\..\addons\ofxCurl\libs\libcurl\include\curl;..\..\..\addons\ofxCurl\libs\libcurl\lib;..\..\..\addons\ofxCurl\src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);..\..\..\addons\ofxCurl\libs;..\..\..\addons\ofxCurl\libs\libcurl;..\..\..\addons\ofxCurl\libs\libcurl\dlls;..\..\..\addons\ofxCurl\libs\libcurl\include;..\..\..\addons\ofxCurl\libs\libcurl\include\curl;..\..\..\addons\ofxCurl\libs\libcurl\lib;..\..\..\addons\ofxCurl\src;..\..\..\addons\ofxJSON\libs;..\..\..\addons\ofxJSON\libs\jsoncpp;..\..\..\addons\ofxJSON\libs\jsoncpp\include;..\..\..\addons\ofxJSON\libs\jsoncpp\include\json;..\..\..\addons\ofxJSON\libs\jsoncpp\src;..\..\..\addons\ofxJSON\src</AdditionalIncludeDirectories>
       <CompileAs>CompileAsCpp</CompileAs>
     </ClCompile>
     <Link>
@@ -173,13 +173,14 @@
     <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\Curl.cpp" />
+    <ClCompile Include="..\src\HTTPClient.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\ofApp.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxJSON\src\ofxJSONElement.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxJSON\libs\jsoncpp\src\jsoncpp.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\src\Curl.h" />
-    <ClInclude Include="..\src\ofxCurl.h" />
+    <ClInclude Include="..\src\HTTPClient.h" />
     <ClInclude Include="src\ofApp.h" />
     <ClInclude Include="..\..\..\addons\ofxCurl\libs\libcurl\include\curl\curl.h" />
     <ClInclude Include="..\..\..\addons\ofxCurl\libs\libcurl\include\curl\curlbuild.h" />
@@ -190,6 +191,10 @@
     <ClInclude Include="..\..\..\addons\ofxCurl\libs\libcurl\include\curl\multi.h" />
     <ClInclude Include="..\..\..\addons\ofxCurl\libs\libcurl\include\curl\stdcheaders.h" />
     <ClInclude Include="..\..\..\addons\ofxCurl\libs\libcurl\include\curl\typecheck-gcc.h" />
+    <ClInclude Include="..\..\..\addons\ofxJSON\src\ofxJSON.h" />
+    <ClInclude Include="..\..\..\addons\ofxJSON\src\ofxJSONElement.h" />
+    <ClInclude Include="..\..\..\addons\ofxJSON\libs\jsoncpp\include\json\json-forwards.h" />
+    <ClInclude Include="..\..\..\addons\ofxJSON\libs\jsoncpp\include\json\json.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="$(OF_ROOT)\libs\openFrameworksCompiled\project\vs\openframeworksLib.vcxproj">

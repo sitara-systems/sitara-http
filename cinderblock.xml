@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<cinder>
+<block
+	name="ofxCurl;"
+	id="org.libcinder.ofxcurl"
+  git="https://github.com/morphogencc/ofxCurl.git"
+	author="Midnight Commercial, nathan lachenmyer"
+	summary="Implements both single- and multi-threaded requests using cURL."
+	license="MIT"
+  url="https://github.com/morphogencc/ofxCurl"
+  library="https://curl.haxx.se/libcurl/"
+  core="true"
+	>
+  
+	<sourcePattern>src/*.cpp</sourcePattern>
+  <headerPattern>src/*.h</headerPattern>
+	<includePath>libs/libcurl/include/</includePath>
+  <includePath>src/</includePath>
+  <libraryPath>libs/libcurl/lib</libraryPath>
+  <staticLibrary>libs/libcurl/lib/libcurl.lib</staticLibrary>
+  <staticLibrary>libs/libcurl/lib/libcurl_a.lib</staticLibrary>
+</block>
+</cinder>

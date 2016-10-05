@@ -1,0 +1,117 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="src\ofApp.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\addons\ofxJSON\src\ofxJSONElement.cpp">
+      <Filter>addons\ofxJSON\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\addons\ofxJSON\libs\jsoncpp\src\jsoncpp.cpp">
+      <Filter>addons\ofxJSON\libs\jsoncpp\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\HTTPClient.cpp">
+      <Filter>addons\ofxCurl\src</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{d8376475-7454-4a24-b08a-aac121d3ad6f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons">
+      <UniqueIdentifier>{71834F65-F3A9-211E-73B8-DC85}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxCurl">
+      <UniqueIdentifier>{3EF73AB5-791A-1182-1A8C-AB56}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxCurl\src">
+      <UniqueIdentifier>{67AE2F26-A86D-D3B9-A8F2-4C22}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxCurl\libs">
+      <UniqueIdentifier>{61A72C37-FFF0-D2CD-497D-F673}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxCurl\libs\libcurl">
+      <UniqueIdentifier>{19B5939A-5CD2-0EEB-3DAC-576B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxCurl\libs\libcurl\include">
+      <UniqueIdentifier>{3974BB99-9179-AA78-ECA5-91C2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxCurl\libs\libcurl\include\curl">
+      <UniqueIdentifier>{3EE0F81E-8727-C3E0-9861-C179}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxJSON">
+      <UniqueIdentifier>{CF86E01B-D8D7-A112-88F3-5883}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxJSON\src">
+      <UniqueIdentifier>{CE83AFE9-FE4A-682E-D5C9-50B4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxJSON\libs">
+      <UniqueIdentifier>{5302B3F8-ECDD-0465-334A-F39E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxJSON\libs\jsoncpp">
+      <UniqueIdentifier>{87D6C548-39D9-FD9F-093E-9F4E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxJSON\libs\jsoncpp\include">
+      <UniqueIdentifier>{0B6CA981-484E-6E8C-776C-7298}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxJSON\libs\jsoncpp\include\json">
+      <UniqueIdentifier>{5FF260B2-1497-3EFE-19D5-40DB}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxJSON\libs\jsoncpp\src">
+      <UniqueIdentifier>{6D569A5B-6719-AEFD-C08E-5CE5}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\ofApp.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxCurl\libs\libcurl\include\curl\curl.h">
+      <Filter>addons\ofxCurl\libs\libcurl\include\curl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxCurl\libs\libcurl\include\curl\curlbuild.h">
+      <Filter>addons\ofxCurl\libs\libcurl\include\curl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxCurl\libs\libcurl\include\curl\curlrules.h">
+      <Filter>addons\ofxCurl\libs\libcurl\include\curl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxCurl\libs\libcurl\include\curl\curlver.h">
+      <Filter>addons\ofxCurl\libs\libcurl\include\curl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxCurl\libs\libcurl\include\curl\easy.h">
+      <Filter>addons\ofxCurl\libs\libcurl\include\curl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxCurl\libs\libcurl\include\curl\mprintf.h">
+      <Filter>addons\ofxCurl\libs\libcurl\include\curl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxCurl\libs\libcurl\include\curl\multi.h">
+      <Filter>addons\ofxCurl\libs\libcurl\include\curl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxCurl\libs\libcurl\include\curl\stdcheaders.h">
+      <Filter>addons\ofxCurl\libs\libcurl\include\curl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxCurl\libs\libcurl\include\curl\typecheck-gcc.h">
+      <Filter>addons\ofxCurl\libs\libcurl\include\curl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxJSON\src\ofxJSON.h">
+      <Filter>addons\ofxJSON\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxJSON\src\ofxJSONElement.h">
+      <Filter>addons\ofxJSON\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxJSON\libs\jsoncpp\include\json\json-forwards.h">
+      <Filter>addons\ofxJSON\libs\jsoncpp\include\json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxJSON\libs\jsoncpp\include\json\json.h">
+      <Filter>addons\ofxJSON\libs\jsoncpp\include\json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\HTTPClient.h">
+      <Filter>addons\ofxCurl\src</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="icon.rc" />
+  </ItemGroup>
+</Project>

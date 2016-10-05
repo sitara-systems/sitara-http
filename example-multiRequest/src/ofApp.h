@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
-#include "ofxCurl.h"
+#include "HTTPClient.h"
 
 class ofApp : public ofBaseApp{
 
@@ -21,6 +21,6 @@ class ofApp : public ofBaseApp{
 		void windowResized(int w, int h);
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
-		
-		std::shared_ptr<ofxCurl::Curl> mCurl;
+
+		std::shared_ptr<Curl::HTTPClient> mHTTPClient;
 };
