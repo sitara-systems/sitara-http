@@ -173,16 +173,15 @@
     <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\HTTPClient.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\ofApp.cpp" />
-    <ClCompile Include="..\..\..\addons\ofxCurl\src\Curl.cpp" />
     <ClCompile Include="..\..\..\addons\ofxJSON\src\ofxJSONElement.cpp" />
     <ClCompile Include="..\..\..\addons\ofxJSON\libs\jsoncpp\src\jsoncpp.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\src\HTTPClient.h" />
     <ClInclude Include="src\ofApp.h" />
-    <ClInclude Include="..\..\..\addons\ofxCurl\src\Curl.h" />
-    <ClInclude Include="..\..\..\addons\ofxCurl\src\ofxCurl.h" />
     <ClInclude Include="..\..\..\addons\ofxCurl\libs\libcurl\include\curl\curl.h" />
     <ClInclude Include="..\..\..\addons\ofxCurl\libs\libcurl\include\curl\curlbuild.h" />
     <ClInclude Include="..\..\..\addons\ofxCurl\libs\libcurl\include\curl\curlrules.h" />

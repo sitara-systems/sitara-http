@@ -2,54 +2,54 @@
 
 //--------------------------------------------------------------
 void ofApp::setup(){
-	mCurl = ofxCurl::Curl::make();
+	mHTTPClient = Curl::HTTPClient::make();
 
 	std::map<std::string, std::string> requestParameters;
 	requestParameters["foo"] = "bar baz";
 
 	std::printf("Loading GET request...\n");
 
-	ofxCurl::HTTPRequest Get;
+	Curl::HTTPRequest Get;
 	Get.mUrl = "http://www.httpbin.org/get";
-	Get.mMethod = ofxCurl::HTTP_GET;
-	Get.mParameterString = mCurl->mapToString(requestParameters);
-	Get.mCallback = [=](ofxCurl::HTTPResponse* response, ofxCurl::Curl* curl) { std::printf("Request complete with code %d; headers are %s\n", response->mResponseCode, curl->JsonToString(response->mHeaders).c_str()); };
-	mCurl->addHTTPRequest(Get);
+	Get.mMethod = Curl::HTTP_GET;
+	Get.mParameterString = mHTTPClient->mapToString(requestParameters);
+	Get.mCallback = [=](Curl::HTTPResponse* response, Curl::HTTPClient* curl) { std::printf("Request complete with code %d; headers are %s\n", response->mResponseCode, curl->JsonToString(response->mHeaders).c_str()); };
+	mHTTPClient->addHTTPRequest(Get);
 
 	std::printf("Loading POST request...\n");
 
-	ofxCurl::HTTPRequest Post;
+	Curl::HTTPRequest Post;
 	Post.mUrl = "http://www.httpbin.org/post";
-	Post.mMethod = ofxCurl::HTTP_POST;
+	Post.mMethod = Curl::HTTP_POST;
 	Post.mParameterString = "";
-	Post.mCallback = [=](ofxCurl::HTTPResponse* response, ofxCurl::Curl* curl) { std::printf("Request complete with code %d; headers are %s\n", response->mResponseCode, curl->JsonToString(response->mHeaders).c_str()); };
-	mCurl->addHTTPRequest(Post);
+	Post.mCallback = [=](Curl::HTTPResponse* response, Curl::HTTPClient* curl) { std::printf("Request complete with code %d; headers are %s\n", response->mResponseCode, curl->JsonToString(response->mHeaders).c_str()); };
+	mHTTPClient->addHTTPRequest(Post);
 
 	std::printf("Loading PUT request...\n");
 
-	ofxCurl::HTTPRequest Put;
+	Curl::HTTPRequest Put;
 	Put.mUrl = "http://www.httpbin.org/put";
-	Put.mMethod = ofxCurl::HTTP_PUT;
+	Put.mMethod = Curl::HTTP_PUT;
 	Put.mParameterString = "";
-	Put.mCallback = [=](ofxCurl::HTTPResponse* response, ofxCurl::Curl* curl) { std::printf("Request complete with code %d; headers are %s\n", response->mResponseCode, curl->JsonToString(response->mHeaders).c_str()); };
-	mCurl->addHTTPRequest(Put);
+	Put.mCallback = [=](Curl::HTTPResponse* response, Curl::HTTPClient* curl) { std::printf("Request complete with code %d; headers are %s\n", response->mResponseCode, curl->JsonToString(response->mHeaders).c_str()); };
+	mHTTPClient->addHTTPRequest(Put);
 
 	std::printf("Loading DELETE request...\n");
 
-	ofxCurl::HTTPRequest Delete;
+	Curl::HTTPRequest Delete;
 	Delete.mUrl = "http://www.httpbin.org/delete";
-	Delete.mMethod = ofxCurl::HTTP_DELETE;
+	Delete.mMethod = Curl::HTTP_DELETE;
 	Delete.mParameterString = "";
-	Delete.mCallback = [=](ofxCurl::HTTPResponse* response, ofxCurl::Curl* curl) { std::printf("Request complete with code %d; headers are %s\n", response->mResponseCode, curl->JsonToString(response->mHeaders).c_str()); };
-	mCurl->addHTTPRequest(Delete);
+	Delete.mCallback = [=](Curl::HTTPResponse* response, Curl::HTTPClient* curl) { std::printf("Request complete with code %d; headers are %s\n", response->mResponseCode, curl->JsonToString(response->mHeaders).c_str()); };
+	mHTTPClient->addHTTPRequest(Delete);
 
 	std::printf("Loading HEAD request...\n");
 
-	ofxCurl::HTTPRequest Head;
+	Curl::HTTPRequest Head;
 	Head.mUrl = "http://www.httpbin.org/headers";
-	Head.mMethod = ofxCurl::HTTP_HEAD;
+	Head.mMethod = Curl::HTTP_HEAD;
 	Head.mParameterString = "";
-	Head.mCallback = [=](ofxCurl::HTTPResponse* response, ofxCurl::Curl* curl) { std::printf("Request complete with code %d; headers are %s\n", response->mResponseCode, curl->JsonToString(response->mHeaders).c_str()); }; mCurl->addHTTPRequest(Head);
+	Head.mCallback = [=](Curl::HTTPResponse* response, Curl::HTTPClient* curl) { std::printf("Request complete with code %d; headers are %s\n", response->mResponseCode, curl->JsonToString(response->mHeaders).c_str()); }; mHTTPClient->addHTTPRequest(Head);
 
 }
 

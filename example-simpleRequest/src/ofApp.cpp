@@ -2,20 +2,20 @@
 
 //--------------------------------------------------------------
 void ofApp::setup(){
-	mCurl = ofxCurl::Curl::make();
+	mHTTPClient = Curl::HTTPClient::make();
 
 	std::map<std::string, std::string> requestParameters;
 	requestParameters["foo"] = "bar baz";
 
 	std::printf("Loading POST request...\n");
 
-	ofxCurl::HTTPRequest Post;
+	Curl::HTTPRequest Post;
 	Post.mUrl = "http://www.httpbin.org/post";
-	Post.mMethod = ofxCurl::HTTP_POST;
-	Post.mParameterString = mCurl->mapToString(requestParameters);
+	Post.mMethod = Curl::HTTP_POST;
+	Post.mParameterString = mHTTPClient->mapToString(requestParameters);
 
-	ofxCurl::HTTPResponse response = mCurl->makeRequest(Post);
-	std::printf("Response headers are %s\n", mCurl->JsonToString(response.mHeaders).c_str());
+	Curl::HTTPResponse response = mHTTPClient->makeRequest(Post);
+	std::printf("Response headers are %s\n", mHTTPClient->JsonToString(response.mHeaders).c_str());
 }
 
 //--------------------------------------------------------------
