@@ -10,7 +10,7 @@
 #include "jsoncpp/json.h"
 #include "curl/curl.h"
 
-namespace ofxCurl {
+namespace Curl {
 
 	enum HTTPMethod {
 		HTTP_DELETE,
@@ -22,13 +22,13 @@ namespace ofxCurl {
 
 	//forward declare
 	struct HTTPResponse;
-	class Curl;
+	class HTTPClient;
 
 	struct HTTPRequest {
 		HTTPMethod mMethod;
 		std::string mUrl;
 		std::string mParameterString;
-		std::function<void(HTTPResponse*, ofxCurl::Curl*)> mCallback;
+		std::function<void(HTTPResponse*, HTTPClient*)> mCallback;
 	};
 
 	struct HTTPResponse {
@@ -38,10 +38,10 @@ namespace ofxCurl {
 		HTTPRequest mRequest;
 	};
 
-	class Curl {
+	class HTTPClient {
 	public:
-		static std::shared_ptr<Curl> make();
-		~Curl();
+		static std::shared_ptr<HTTPClient> make();
+		~HTTPClient();
 		HTTPResponse makeRequest(const HTTPRequest request);
 		void addHTTPRequest(const HTTPRequest request);
 		size_t getNumberOfRequests();
@@ -53,7 +53,7 @@ namespace ofxCurl {
 		std::string MethodToString(const HTTPMethod &method);
 		std::string JsonToString(const Json::Value &value);
 	protected:
-		Curl();
+		HTTPClient();
 		void updateThreads();
 		void loadRequest();
 		void setOptions(CURL* curl, const HTTPRequest request);

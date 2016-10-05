@@ -1,7 +1,7 @@
 #include "cinder/app/App.h"
 #include "cinder/app/RendererGl.h"
 #include "cinder/gl/gl.h"
-#include "ofxCurl.h"
+#include "HTTPClient.h"
 
 using namespace ci;
 using namespace ci::app;
@@ -14,61 +14,61 @@ public:
 	void update() override;
 	void draw() override;
 
-	std::shared_ptr<ofxCurl::Curl> mCurl;
+	std::shared_ptr<Curl::HTTPClient> mCurl;
 	double mTime;
 };
 
 void cinder_multiRequestApp::setup() {
 	mTime = cinder::app::getElapsedSeconds();
 
-	mCurl = ofxCurl::Curl::make();
+	mCurl = Curl::HTTPClient::make();
 
 	std::map<std::string, std::string> requestParameters;
 	requestParameters["foo"] = "bar baz";
 
 	std::printf("Loading GET request...\n");
 
-	ofxCurl::HTTPRequest Get;
+	Curl::HTTPRequest Get;
 	Get.mUrl = "http://www.httpbin.org/get";
-	Get.mMethod = ofxCurl::HTTP_GET;
+	Get.mMethod = Curl::HTTP_GET;
 	Get.mParameterString = mCurl->mapToString(requestParameters);
-	Get.mCallback = [=](ofxCurl::HTTPResponse* response, ofxCurl::Curl* curl) { std::printf("Request complete with code %d; headers are %s\n", response->mResponseCode, curl->JsonToString(response->mHeaders).c_str()); };
+	Get.mCallback = [=](Curl::HTTPResponse* response, Curl::HTTPClient* curl) { std::printf("Request complete with code %d; headers are %s\n", response->mResponseCode, curl->JsonToString(response->mHeaders).c_str()); };
 	mCurl->addHTTPRequest(Get);
 
 	std::printf("Loading POST request...\n");
 
-	ofxCurl::HTTPRequest Post;
+	Curl::HTTPRequest Post;
 	Post.mUrl = "http://www.httpbin.org/post";
-	Post.mMethod = ofxCurl::HTTP_POST;
+	Post.mMethod = Curl::HTTP_POST;
 	Post.mParameterString = "";
-	Post.mCallback = [=](ofxCurl::HTTPResponse* response, ofxCurl::Curl* curl) { std::printf("Request complete with code %d; headers are %s\n", response->mResponseCode, curl->JsonToString(response->mHeaders).c_str()); };
+	Post.mCallback = [=](Curl::HTTPResponse* response, Curl::HTTPClient* curl) { std::printf("Request complete with code %d; headers are %s\n", response->mResponseCode, curl->JsonToString(response->mHeaders).c_str()); };
 	mCurl->addHTTPRequest(Post);
 
 	std::printf("Loading PUT request...\n");
 
-	ofxCurl::HTTPRequest Put;
+	Curl::HTTPRequest Put;
 	Put.mUrl = "http://www.httpbin.org/put";
-	Put.mMethod = ofxCurl::HTTP_PUT;
+	Put.mMethod = Curl::HTTP_PUT;
 	Put.mParameterString = "";
-	Put.mCallback = [=](ofxCurl::HTTPResponse* response, ofxCurl::Curl* curl) { std::printf("Request complete with code %d; headers are %s\n", response->mResponseCode, curl->JsonToString(response->mHeaders).c_str()); };
+	Put.mCallback = [=](Curl::HTTPResponse* response, Curl::HTTPClient* curl) { std::printf("Request complete with code %d; headers are %s\n", response->mResponseCode, curl->JsonToString(response->mHeaders).c_str()); };
 	mCurl->addHTTPRequest(Put);
 
 	std::printf("Loading DELETE request...\n");
 
-	ofxCurl::HTTPRequest Delete;
+	Curl::HTTPRequest Delete;
 	Delete.mUrl = "http://www.httpbin.org/delete";
-	Delete.mMethod = ofxCurl::HTTP_DELETE;
+	Delete.mMethod = Curl::HTTP_DELETE;
 	Delete.mParameterString = "";
-	Delete.mCallback = [=](ofxCurl::HTTPResponse* response, ofxCurl::Curl* curl) { std::printf("Request complete with code %d; headers are %s\n", response->mResponseCode, curl->JsonToString(response->mHeaders).c_str()); };
+	Delete.mCallback = [=](Curl::HTTPResponse* response, Curl::HTTPClient* curl) { std::printf("Request complete with code %d; headers are %s\n", response->mResponseCode, curl->JsonToString(response->mHeaders).c_str()); };
 	mCurl->addHTTPRequest(Delete);
 
 	std::printf("Loading HEAD request...\n");
 
-	ofxCurl::HTTPRequest Head;
+	Curl::HTTPRequest Head;
 	Head.mUrl = "http://www.httpbin.org/headers";
-	Head.mMethod = ofxCurl::HTTP_HEAD;
+	Head.mMethod = Curl::HTTP_HEAD;
 	Head.mParameterString = "";
-	Head.mCallback = [=](ofxCurl::HTTPResponse* response, ofxCurl::Curl* curl) { std::printf("Request complete with code %d; headers are %s\n", response->mResponseCode, curl->JsonToString(response->mHeaders).c_str()); }; mCurl->addHTTPRequest(Head);
+	Head.mCallback = [=](Curl::HTTPResponse* response, Curl::HTTPClient* curl) { std::printf("Request complete with code %d; headers are %s\n", response->mResponseCode, curl->JsonToString(response->mHeaders).c_str()); }; mCurl->addHTTPRequest(Head);
 
 }
 
@@ -76,21 +76,7 @@ void cinder_multiRequestApp::mouseDown(MouseEvent event)
 {
 }
 
-void cinder_multiRequestApp::update()
-{
-	if (cinder::app::getElapsedFrames() % 300 == 0) {
-		std::printf("Sending new GET request at %f\n", cinder::app::getElapsedSeconds() - mTime);
-
-		std::map<std::string, std::string> requestParameters;
-		requestParameters["foo"] = "bar baz";
-
-		ofxCurl::HTTPRequest Get;
-		Get.mUrl = "http://www.httpbin.org/get";
-		Get.mMethod = ofxCurl::HTTP_GET;
-		Get.mParameterString = mCurl->mapToString(requestParameters);
-		Get.mCallback = [=](ofxCurl::HTTPResponse* response, ofxCurl::Curl* curl) { std::printf("Request complete with code %d; headers are %s\n", response->mResponseCode, curl->JsonToString(response->mHeaders).c_str()); };
-		mCurl->addHTTPRequest(Get);
-	}
+void cinder_multiRequestApp::update() {
 }
 
 void cinder_multiRequestApp::draw()
