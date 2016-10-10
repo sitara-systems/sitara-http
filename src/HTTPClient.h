@@ -25,9 +25,12 @@ namespace Curl {
 	class HTTPClient;
 
 	struct HTTPRequest {
+		HTTPRequest() : mMethod(HTTP_GET), mUrl(""), mParameterString(""), mCallback(NULL) {};
+
 		HTTPMethod mMethod;
 		std::string mUrl;
 		std::string mParameterString;
+		//DataTarget
 		std::function<void(HTTPResponse*, HTTPClient*)> mCallback;
 	};
 
