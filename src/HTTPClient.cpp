@@ -155,22 +155,25 @@ void HTTPClient::updateThreads() {
 				checkForErrors(curlCode);
 
 				Json::Value full_response;
-				bool parsingSuccessful = mJsonReader.parse(mOutputBuffer, full_response);     //parse process
+				bool parsingSuccessful = mJsonReader.parse(mOutputBuffer, full_response);
 				if (!parsingSuccessful) {
-					std::cout << "Failed to parse JSON " << mJsonReader.getFormattedErrorMessages();
+					std::printf("midnight-HTTP::HTTPClient ERROR: Failed to parse JSON %s", mJsonReader.getFormattedErrorMessages());
 				}
 				response.mHeaders = full_response["headers"];
 				// TO BE IMPLEMENTED -- load body into JSON object
-				//response.mBody = full_response["Body"];
-				response.mBody = NULL;
+				response.mBody = mOutputBuffer;
+				//response.mBody = NULL;
 
 				mHandleMap[curlInstance].mCallback(&response, this);
 
+				if (mFile != NULL) {
+					std::fclose(mFile);
+				}
 				curl_multi_remove_handle(mMultiCurl, curlInstance);
 				curl_easy_cleanup(curlInstance);
 			}
 			else {
-				std::fprintf(stderr, "error: after curl_multi_info_read(), CURLMsg=%d\n", message->msg);
+				std::printf("midnight-HTTP::HTTPClient ERROR: After curl_multi_info_read(), CURLMsg=%d\n", message->msg);
 			}
 		}
 
@@ -197,11 +200,7 @@ void HTTPClient::setOptions(CURL* curl, const HTTPRequest request) {
 	checkForErrors(curlCode);
 	curlCode = curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1);
 	checkForErrors(curlCode);
-	curlCode = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &writeCallback);
-	checkForErrors(curlCode);
 	mOutputBuffer.clear();
-	curlCode = curl_easy_setopt(curl, CURLOPT_WRITEDATA, &mOutputBuffer);
-	checkForErrors(curlCode);
 	curlCode = curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2);
 	checkForErrors(curlCode);
 	curlCode = curl_easy_setopt(curl, CURLOPT_USERAGENT, mUserAgent.c_str());
@@ -209,8 +208,23 @@ void HTTPClient::setOptions(CURL* curl, const HTTPRequest request) {
 	curlCode = curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0); // this line makes it work under https
 	checkForErrors(curlCode);
 
+	if (request.mTarget == MEMORY) {
+		curlCode = curl_easy_setopt(curl, CURLOPT_WRITEDATA, &mOutputBuffer);
+		checkForErrors(curlCode);
+		curlCode = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &writeToMemory);
+		checkForErrors(curlCode);
+	} 
+	else if (request.mTarget == FILE) {
+		mFile = std::fopen(request.mFilename.c_str(), "w");
+		if (mFile == NULL) {
+			std::printf("midnight-HTTP::HTTPClient ERROR: Cannot open file %s\n", request.mFilename.c_str());
+		}
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, mFile);
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &writeToFile);
+	}
+
 	if (!mMultiCurl) {
-		std::printf("ofxCurl ERROR: Curl hasn't been instantiated!");
+		std::printf("midnight-HTTP::HTTPClient ERROR: MultiCurl hasn't been instantiated!");
 	}
 
 	std::string param_url = request.mUrl + "?" + request.mParameterString;
@@ -261,19 +275,23 @@ void HTTPClient::setOptions(CURL* curl, const HTTPRequest request) {
 void HTTPClient::checkForErrors(const CURLcode error_code) {
 	std::string errorString = curl_easy_strerror(error_code);
 	if (error_code != CURLE_OK) {
-		std::printf("ofxHTTPClient::Curl ERROR: cURL failed: %s\n", errorString.c_str());
+		std::printf("midnight-HTTP::HTTPClient ERROR: cURL failed: %s\n", errorString.c_str());
 	}
 }
 
 void HTTPClient::checkForMultiErrors(const CURLMcode error_code) {
 	std::string errorString = curl_multi_strerror(error_code);
 	if (error_code != CURLM_OK) {
-		std::printf("ofxHTTPClient::Curl ERROR: multi-cURL failed: %s\n", errorString.c_str());
+		std::printf("midnight-HTTP::HTTPClient ERROR: multi-cURL failed: %s\n", errorString.c_str());
 	}
 }
 
-size_t HTTPClient::writeCallback(const char* contents, size_t size, size_t nmemb, std::string* buffer) {
+size_t HTTPClient::writeToMemory(const char* contents, size_t size, size_t nmemb, std::string* buffer) {
 	size_t realsize = size * nmemb;
 	buffer->append(contents, realsize);
 	return realsize;
+}
+
+size_t HTTPClient::writeToFile(const char* contents, size_t size, size_t nmemb, std::FILE *stream) {
+	return std::fwrite(contents, size, nmemb, stream);
 }

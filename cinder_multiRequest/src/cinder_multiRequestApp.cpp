@@ -40,7 +40,6 @@ void cinder_multiRequestApp::setup() {
 	Curl::HTTPRequest Post;
 	Post.mUrl = "http://www.httpbin.org/post";
 	Post.mMethod = Curl::HTTP_POST;
-	Post.mParameterString = "";
 	Post.mCallback = [=](Curl::HTTPResponse* response, Curl::HTTPClient* curl) { std::printf("Request complete with code %d; headers are %s\n", response->mResponseCode, curl->JsonToString(response->mHeaders).c_str()); };
 	mCurl->addHTTPRequest(Post);
 
@@ -49,7 +48,6 @@ void cinder_multiRequestApp::setup() {
 	Curl::HTTPRequest Put;
 	Put.mUrl = "http://www.httpbin.org/put";
 	Put.mMethod = Curl::HTTP_PUT;
-	Put.mParameterString = "";
 	Put.mCallback = [=](Curl::HTTPResponse* response, Curl::HTTPClient* curl) { std::printf("Request complete with code %d; headers are %s\n", response->mResponseCode, curl->JsonToString(response->mHeaders).c_str()); };
 	mCurl->addHTTPRequest(Put);
 
@@ -58,7 +56,6 @@ void cinder_multiRequestApp::setup() {
 	Curl::HTTPRequest Delete;
 	Delete.mUrl = "http://www.httpbin.org/delete";
 	Delete.mMethod = Curl::HTTP_DELETE;
-	Delete.mParameterString = "";
 	Delete.mCallback = [=](Curl::HTTPResponse* response, Curl::HTTPClient* curl) { std::printf("Request complete with code %d; headers are %s\n", response->mResponseCode, curl->JsonToString(response->mHeaders).c_str()); };
 	mCurl->addHTTPRequest(Delete);
 
@@ -67,7 +64,6 @@ void cinder_multiRequestApp::setup() {
 	Curl::HTTPRequest Head;
 	Head.mUrl = "http://www.httpbin.org/headers";
 	Head.mMethod = Curl::HTTP_HEAD;
-	Head.mParameterString = "";
 	Head.mCallback = [=](Curl::HTTPResponse* response, Curl::HTTPClient* curl) { std::printf("Request complete with code %d; headers are %s\n", response->mResponseCode, curl->JsonToString(response->mHeaders).c_str()); }; mCurl->addHTTPRequest(Head);
 
 }

@@ -13,6 +13,7 @@
 namespace Curl {
 
 	enum HTTPMethod {
+		HTTP_NONE,
 		HTTP_DELETE,
 		HTTP_PUT,
 		HTTP_POST,
@@ -20,23 +21,29 @@ namespace Curl {
 		HTTP_HEAD
 	};
 
+	enum DataTarget {
+		MEMORY,
+		FILE
+	};
+
 	//forward declare
 	struct HTTPResponse;
 	class HTTPClient;
 
 	struct HTTPRequest {
-		HTTPRequest() : mMethod(HTTP_GET), mUrl(""), mParameterString(""), mCallback(NULL) {};
+		HTTPRequest() : mMethod(HTTP_NONE), mUrl(""), mParameterString(""), mTarget(MEMORY), mFilename(""), mCallback(NULL) {};
 
 		HTTPMethod mMethod;
 		std::string mUrl;
 		std::string mParameterString;
-		//DataTarget
+		DataTarget mTarget;
+		std::string mFilename;
 		std::function<void(HTTPResponse*, HTTPClient*)> mCallback;
 	};
 
 	struct HTTPResponse {
 		long mResponseCode;
-		Json::Value mBody;
+		std::string mBody;
 		Json::Value mHeaders;
 		HTTPRequest mRequest;
 	};
@@ -62,12 +69,14 @@ namespace Curl {
 		void setOptions(CURL* curl, const HTTPRequest request);
 		void checkForErrors(const CURLcode error_code);
 		void checkForMultiErrors(const CURLMcode error_code);
-		static size_t writeCallback(const char* contents, size_t size, size_t nmemb, std::string* buffer);
+		static size_t writeToMemory(const char* contents, size_t size, size_t nmemb, std::string* buffer);
+		static size_t writeToFile(const char* contents, size_t size, size_t nmemb, std::FILE* stream);
 		CURL* mMultiCurl;
 		Json::Reader mJsonReader;
 		Json::StyledWriter mJsonWriter;
 		int mMaxNumberOfThreads;
 		int mCurrentNumberOfThreads;
+		std::FILE* mFile;
 		std::string mOutputBuffer;
 		std::vector<char> mErrorBuffer;	
 		std::thread mUpdateThread;
