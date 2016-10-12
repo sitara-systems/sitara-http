@@ -18,6 +18,7 @@ HTTPClient::HTTPClient() : mErrorBuffer(CURL_ERROR_SIZE) {
 	checkForMultiErrors(multiCode);
 	mUserAgent = "Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)";
 	mUpdateThread = std::thread(&HTTPClient::updateThreads, this);
+	mFile = NULL;
 }
 
 HTTPClient::~HTTPClient() {
@@ -154,20 +155,23 @@ void HTTPClient::updateThreads() {
 				curlCode = curl_easy_getinfo(curlInstance, CURLINFO_RESPONSE_CODE, &response.mResponseCode);
 				checkForErrors(curlCode);
 
+				std::printf("Response: %s\n", mOutputBuffer.c_str());
+
 				Json::Value full_response;
 				bool parsingSuccessful = mJsonReader.parse(mOutputBuffer, full_response);
 				if (!parsingSuccessful) {
-					std::printf("midnight-HTTP::HTTPClient ERROR: Failed to parse JSON %s", mJsonReader.getFormattedErrorMessages());
+					std::printf("midnight-HTTP::HTTPClient ERROR: Failed to parse JSON %s\n", mJsonReader.getFormattedErrorMessages().c_str());
 				}
-				response.mHeaders = full_response["headers"];
-				// TO BE IMPLEMENTED -- load body into JSON object
-				response.mBody = mOutputBuffer;
-				//response.mBody = NULL;
+				//full_response.removeMember("headers", &response.mHeaders);				
+				response.mBody = full_response;
 
 				mHandleMap[curlInstance].mCallback(&response, this);
 
 				if (mFile != NULL) {
 					std::fclose(mFile);
+				}
+				else {
+					mOutputBuffer.clear();
 				}
 				curl_multi_remove_handle(mMultiCurl, curlInstance);
 				curl_easy_cleanup(curlInstance);
@@ -182,7 +186,11 @@ void HTTPClient::updateThreads() {
 
 void HTTPClient::loadRequest() {
 	HTTPRequest request = mRequestQueue.front();
-			
+	
+	//makeStringSafe(request.mParameterString);
+
+	std::printf("String is : %s\n", request.mParameterString.c_str());
+
 	CURL* c = curl_easy_init();
 	setOptions(c, request);
 
@@ -196,6 +204,14 @@ void HTTPClient::loadRequest() {
 
 void HTTPClient::setOptions(CURL* curl, const HTTPRequest request) {
 	CURLcode curlCode;
+	
+	/*
+	struct curl_slist *slist = NULL;
+	slist = curl_slist_append(slist, "Content-Type: application/json");
+	curlCode = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, slist);
+	checkForErrors(curlCode);
+	*/
+
 	curlCode = curl_easy_setopt(curl, CURLOPT_HEADER, 0);
 	checkForErrors(curlCode);
 	curlCode = curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1);
@@ -235,21 +251,22 @@ void HTTPClient::setOptions(CURL* curl, const HTTPRequest request) {
 		checkForErrors(curlCode);
 		curlCode = curl_easy_setopt(curl, CURLOPT_POSTFIELDS, request.mParameterString.c_str());
 		checkForErrors(curlCode);
+		curlCode = curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, strlen(request.mParameterString.c_str()));
+		checkForErrors(curlCode);
+		curlCode = curl_easy_setopt(curl, CURLOPT_URL, request.mUrl.c_str());
+		checkForErrors(curlCode);
+		std::printf("%s\n", request.mUrl.c_str());
+		break;
+	case HTTP_GET:
 		curlCode = curl_easy_setopt(curl, CURLOPT_URL, request.mUrl.c_str());
 		checkForErrors(curlCode);
 		break;
-	case HTTP_GET:
-		if (!request.mParameterString.empty()) {
-			curlCode = curl_easy_setopt(curl, CURLOPT_URL, param_url.c_str());
-			checkForErrors(curlCode);
-		}
-		else {
-			curlCode = curl_easy_setopt(curl, CURLOPT_URL, request.mUrl.c_str());
-			checkForErrors(curlCode);
-		}
-		break;
 	case HTTP_PUT:
 		curlCode = curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
+		checkForErrors(curlCode);
+		curlCode = curl_easy_setopt(curl, CURLOPT_POSTFIELDS, request.mParameterString.c_str());
+		checkForErrors(curlCode);
+		curlCode = curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, strlen(request.mParameterString.c_str()));
 		checkForErrors(curlCode);
 		curlCode = curl_easy_setopt(curl, CURLOPT_URL, request.mUrl.c_str());
 		checkForErrors(curlCode);
@@ -260,6 +277,8 @@ void HTTPClient::setOptions(CURL* curl, const HTTPRequest request) {
 		curlCode = curl_easy_setopt(curl, CURLOPT_URL, request.mUrl.c_str());
 		checkForErrors(curlCode);
 		curlCode = curl_easy_setopt(curl, CURLOPT_POSTFIELDS, request.mParameterString.c_str());
+		checkForErrors(curlCode);
+		curlCode = curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, strlen(request.mParameterString.c_str()));
 		checkForErrors(curlCode);
 		break;
 	case HTTP_HEAD:

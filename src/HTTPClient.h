@@ -43,7 +43,7 @@ namespace Curl {
 
 	struct HTTPResponse {
 		long mResponseCode;
-		std::string mBody;
+		Json::Value mBody;
 		Json::Value mHeaders;
 		HTTPRequest mRequest;
 	};
