@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <cctype>
 #include <vector>
 #include <queue>
 #include <map>
@@ -18,7 +19,9 @@ namespace Curl {
 		HTTP_PUT,
 		HTTP_POST,
 		HTTP_GET,
-		HTTP_HEAD
+		HTTP_HEAD,
+		HTTP_PATCH,
+		HTTP_OPTIONS
 	};
 
 	enum DataTarget {
@@ -60,8 +63,9 @@ namespace Curl {
 		void setUserAgent(const std::string &agent);
 		std::string mapToString(const std::map<std::string, std::string> &map);
 		void makeStringSafe(std::string &input);
-		std::string MethodToString(const HTTPMethod &method);
-		std::string JsonToString(const Json::Value &value);
+		std::string methodToString(const HTTPMethod &method);
+		std::string jsonToString(const Json::Value &value);
+		Json::Value stringToJson(const std::string &string);
 	protected:
 		HTTPClient();
 		void updateThreads();
@@ -71,14 +75,19 @@ namespace Curl {
 		void checkForMultiErrors(const CURLMcode error_code);
 		static size_t writeToMemory(const char* contents, size_t size, size_t nmemb, std::string* buffer);
 		static size_t writeToFile(const char* contents, size_t size, size_t nmemb, std::FILE* stream);
+		static size_t writeToHeaders(const char *contents, size_t size, size_t nmemb, std::string* data);
+		void splitString(const std::string &string, char delimiter, std::vector<std::string> &output);
+		std::vector<std::string> splitString(const std::string &string, char delimiter);
+		void cleanupString(std::string &string);
 		CURL* mMultiCurl;
 		Json::Reader mJsonReader;
 		Json::StyledWriter mJsonWriter;
 		int mMaxNumberOfThreads;
 		int mCurrentNumberOfThreads;
 		std::FILE* mFile;
-		std::string mOutputBuffer;
-		std::vector<char> mErrorBuffer;	
+		std::string mResponseBuffer;
+		std::string mHeaderBuffer;
+		std::vector<char> mErrorBuffer;
 		std::thread mUpdateThread;
 		std::string mUserAgent;
 		std::map<CURL*, HTTPRequest> mHandleMap;

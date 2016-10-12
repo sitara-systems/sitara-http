@@ -12,7 +12,8 @@ HTTPClient::HTTPClient() : mErrorBuffer(CURL_ERROR_SIZE) {
 	mCurrentNumberOfThreads = 0;
 	curl_global_init(CURL_GLOBAL_ALL);
 	mMultiCurl = curl_multi_init();
-	mOutputBuffer = "";
+	mResponseBuffer = "";
+	mHeaderBuffer = "";
 	CURLMcode multiCode;
 	multiCode = curl_multi_setopt(mMultiCurl, CURLMOPT_MAXCONNECTS, mMaxNumberOfThreads);
 	checkForMultiErrors(multiCode);
@@ -41,7 +42,7 @@ HTTPResponse HTTPClient::makeRequest(const HTTPRequest request) {
 	curlCode = curl_easy_getinfo(c, CURLINFO_RESPONSE_CODE, &response.mResponseCode);
 	checkForErrors(curlCode);
 
-	response.mBody = mOutputBuffer;
+	response.mBody = mResponseBuffer;
 
 	return response;
 }
@@ -97,7 +98,7 @@ void HTTPClient::makeStringSafe(std::string &input) {
 	input = curl_easy_escape(mMultiCurl, input.c_str(), 0);
 }
 
-std::string HTTPClient::MethodToString(const HTTPMethod &method) {
+std::string HTTPClient::methodToString(const HTTPMethod &method) {
 	switch (method) {
 	case HTTP_DELETE:
 		return "DELETE";
@@ -114,9 +115,21 @@ std::string HTTPClient::MethodToString(const HTTPMethod &method) {
 	}
 }
 
-std::string HTTPClient::JsonToString(const Json::Value &value) {
+std::string HTTPClient::jsonToString(const Json::Value &value) {
 	std::string output = mJsonWriter.write(value);
 	return output;
+}
+
+Json::Value HTTPClient::stringToJson(const std::string &string) {
+	Json::Value output;
+	bool parsingSuccessful = mJsonReader.parse(mResponseBuffer, output);
+	if (!parsingSuccessful) {
+		std::printf("midnight-HTTP::HTTPClient ERROR: Failed to parse JSON %s\n", mJsonReader.getFormattedErrorMessages().c_str());
+		return NULL;
+	}
+	else {
+		return output;
+	}
 }
 
 
@@ -149,29 +162,39 @@ void HTTPClient::updateThreads() {
 				curlCode = message->data.result;
 				checkForErrors(curlCode);
 
-				// Write information from the request to a HTTPResponse object
 				HTTPResponse response;
+				
+				// corresponding request
 				response.mRequest = mHandleMap[curlInstance];
+
+				// response code
 				curlCode = curl_easy_getinfo(curlInstance, CURLINFO_RESPONSE_CODE, &response.mResponseCode);
 				checkForErrors(curlCode);
 
-				std::printf("Response: %s\n", mOutputBuffer.c_str());
-
-				Json::Value full_response;
-				bool parsingSuccessful = mJsonReader.parse(mOutputBuffer, full_response);
-				if (!parsingSuccessful) {
-					std::printf("midnight-HTTP::HTTPClient ERROR: Failed to parse JSON %s\n", mJsonReader.getFormattedErrorMessages().c_str());
+				// response headers
+				std::vector<std::string> headerLines = splitString(mHeaderBuffer, '\n');
+				for (auto &line : headerLines) {
+					std::vector<std::string> pair = splitString(line, ':');
+					if (pair.size() == 2) {
+						cleanupString(pair[0]);
+						cleanupString(pair[1]);
+						response.mHeaders[pair[0]] = pair[1];
+					}
 				}
-				//full_response.removeMember("headers", &response.mHeaders);				
-				response.mBody = full_response;
+				std::printf("Header from Json: %s", jsonToString(response.mHeaders).c_str());
 
+				// response body
+				response.mBody = stringToJson(mResponseBuffer);
+
+				// callback attached to request
 				mHandleMap[curlInstance].mCallback(&response, this);
 
+				// cleanup
 				if (mFile != NULL) {
 					std::fclose(mFile);
 				}
 				else {
-					mOutputBuffer.clear();
+					mResponseBuffer.clear();
 				}
 				curl_multi_remove_handle(mMultiCurl, curlInstance);
 				curl_easy_cleanup(curlInstance);
@@ -188,8 +211,6 @@ void HTTPClient::loadRequest() {
 	HTTPRequest request = mRequestQueue.front();
 	
 	//makeStringSafe(request.mParameterString);
-
-	std::printf("String is : %s\n", request.mParameterString.c_str());
 
 	CURL* c = curl_easy_init();
 	setOptions(c, request);
@@ -212,11 +233,12 @@ void HTTPClient::setOptions(CURL* curl, const HTTPRequest request) {
 	checkForErrors(curlCode);
 	*/
 
-	curlCode = curl_easy_setopt(curl, CURLOPT_HEADER, 0);
+	curlCode = curl_easy_setopt(curl, CURLOPT_HEADER, 1);
 	checkForErrors(curlCode);
+
 	curlCode = curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1);
 	checkForErrors(curlCode);
-	mOutputBuffer.clear();
+	mResponseBuffer.clear();
 	curlCode = curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2);
 	checkForErrors(curlCode);
 	curlCode = curl_easy_setopt(curl, CURLOPT_USERAGENT, mUserAgent.c_str());
@@ -225,11 +247,16 @@ void HTTPClient::setOptions(CURL* curl, const HTTPRequest request) {
 	checkForErrors(curlCode);
 
 	if (request.mTarget == MEMORY) {
-		curlCode = curl_easy_setopt(curl, CURLOPT_WRITEDATA, &mOutputBuffer);
+		curlCode = curl_easy_setopt(curl, CURLOPT_WRITEDATA, &mResponseBuffer);
 		checkForErrors(curlCode);
 		curlCode = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &writeToMemory);
 		checkForErrors(curlCode);
-	} 
+
+		curlCode = curl_easy_setopt(curl, CURLOPT_WRITEHEADER, &mHeaderBuffer);
+		checkForErrors(curlCode);
+		curlCode = curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, &writeToHeaders);
+		checkForErrors(curlCode);
+	}
 	else if (request.mTarget == FILE) {
 		mFile = std::fopen(request.mFilename.c_str(), "w");
 		if (mFile == NULL) {
@@ -287,6 +314,7 @@ void HTTPClient::setOptions(CURL* curl, const HTTPRequest request) {
 		curlCode = curl_easy_setopt(curl, CURLOPT_URL, request.mUrl.c_str());
 		checkForErrors(curlCode);
 	default:
+		std::printf("midnight-HTTP::HTTPClient HTTP Method not implemented.\n");
 		break;
 	}
 }
@@ -311,6 +339,38 @@ size_t HTTPClient::writeToMemory(const char* contents, size_t size, size_t nmemb
 	return realsize;
 }
 
-size_t HTTPClient::writeToFile(const char* contents, size_t size, size_t nmemb, std::FILE *stream) {
+size_t HTTPClient::writeToFile(const char* contents, size_t size, size_t nmemb, std::FILE* stream) {
 	return std::fwrite(contents, size, nmemb, stream);
+}
+
+size_t HTTPClient::writeToHeaders(const char *contents, size_t size, size_t nmemb, std::string* data) {
+	size_t realsize = size * nmemb;
+	data->append(contents, realsize);
+	return realsize;
+}
+
+void HTTPClient::splitString(const std::string &string, char delimiter, std::vector<std::string> &output) {
+	std::stringstream ss;
+	ss.str(string);
+	std::string item;
+	while (std::getline(ss, item, delimiter)) {
+		output.push_back(item);
+	}
+}
+
+std::vector<std::string> HTTPClient::splitString(const std::string &string, char delimiter) {
+	std::vector<std::string> output;
+	splitString(string, delimiter, output);
+	return output;
+}
+
+void HTTPClient::cleanupString(std::string &string) {
+	while (!string.empty() && std::isspace(*string.begin()))
+		string.erase(string.begin());
+
+	while (!string.empty() && std::isspace(*string.rbegin()))
+		string.erase(string.length() - 1);
+
+	string.erase(std::remove(string.begin(), string.end(), '\n'), string.end());
+	string.erase(std::remove(string.begin(), string.end(), '\r'), string.end());
 }
