@@ -1,6 +1,6 @@
 #include "HTTPClient.h"
 
-using namespace Curl;
+using namespace midnight::http;
 
 std::shared_ptr<HTTPClient> HTTPClient::make() {
 	std::shared_ptr<HTTPClient> client(new HTTPClient());
@@ -27,7 +27,7 @@ HTTPClient::~HTTPClient() {
 	curl_global_cleanup();
 }
 
-HTTPResponse HTTPClient::makeRequest(const HTTPRequest request) {
+HTTPResponse HTTPClient::makeRequest(const HTTPRequest &request) {
 	/*
 	Makes a blocking request.  This function will cause your program to wait for the request to be completed and then return a string.
 	*/
@@ -37,12 +37,42 @@ HTTPResponse HTTPClient::makeRequest(const HTTPRequest request) {
 	CURLcode curlCode = curl_easy_perform(c);
 	checkForErrors(curlCode);
 
+	
 	HTTPResponse response;
+	
+	// corresponding request
 	response.mRequest = request;
+
+	// response code
 	curlCode = curl_easy_getinfo(c, CURLINFO_RESPONSE_CODE, &response.mResponseCode);
 	checkForErrors(curlCode);
 
-	response.mBody = mResponseBuffer;
+	// response headers
+	std::vector<std::string> headerLines = splitString(mHeaderBuffer, '\n');
+	for (auto &line : headerLines) {
+		std::vector<std::string> pair = splitString(line, ':');
+		if (pair.size() == 2) {
+			cleanupString(pair[0]);
+			cleanupString(pair[1]);
+			response.mHeaders[pair[0]] = pair[1];
+		}
+	}
+
+	// response body
+	Json::Value body = stringToJson(mResponseBuffer);
+	if (body != NULL) {
+		response.mBody = body;
+	}
+	else {
+		Json::Value textBody;
+		textBody["response_body"] = mResponseBuffer;
+		response.mBody = textBody;
+	}
+
+	// callback attached to request
+	request.mCallback(&response, this);
+
+	curl_easy_cleanup(c);
 
 	return response;
 }
@@ -52,10 +82,9 @@ void HTTPClient::addHTTPRequest(const HTTPRequest request) {
 	/*
 	Adds a non-blocking request to the request queue.  Requests will be made when a spot in the queue is available, and then the callback attached to the request object will be called.
 	*/
+	mUpdateMutex.lock();
 	mRequestQueue.push(request);
-
-	HTTPResponse response;
-	response.mRequest = request;
+	mUpdateMutex.unlock();
 }
 
 size_t HTTPClient::getNumberOfRequests() {
@@ -75,6 +104,10 @@ int HTTPClient::getMaxNumberOfThreads() {
 
 void HTTPClient::setUserAgent(const std::string &agent) {
 	mUserAgent = agent;
+}
+
+std::string HTTPClient::getUserAgent() {
+	return mUserAgent;
 }
 
 std::string HTTPClient::mapToString(const std::map<std::string, std::string> &map) {
@@ -106,10 +139,12 @@ std::string HTTPClient::methodToString(const HTTPMethod &method) {
 		return "PUT";
 	case HTTP_POST:
 		return "POST";
+	case HTTP_PATCH:
+		return "PATCH";
 	case HTTP_GET:
 		return "GET";
-	case HTTP_HEAD:
-		return "HEAD";
+	case HTTP_HEADERS:
+		return "HEADERS";
 	default:
 		return NULL;
 	}
@@ -136,9 +171,11 @@ Json::Value HTTPClient::stringToJson(const std::string &string) {
 void HTTPClient::updateThreads() {
 	while (true) {
 		CURLMcode multiCode;
+		mUpdateMutex.lock();
 		while (mCurrentNumberOfThreads < mMaxNumberOfThreads && mRequestQueue.size() > 0) {
 			loadRequest();
 		}
+		mUpdateMutex.unlock();
 		do {
 			int numfds = 0;
 			multiCode = curl_multi_wait(mMultiCurl, NULL, 0, MAX_WAIT_MSECS, &numfds);
@@ -181,10 +218,17 @@ void HTTPClient::updateThreads() {
 						response.mHeaders[pair[0]] = pair[1];
 					}
 				}
-				std::printf("Header from Json: %s", jsonToString(response.mHeaders).c_str());
 
 				// response body
-				response.mBody = stringToJson(mResponseBuffer);
+				Json::Value body = stringToJson(mResponseBuffer);
+				if (body != NULL) {
+					response.mBody = body;
+				}
+				else {
+					Json::Value textBody;
+					textBody["response_body"] = mResponseBuffer;
+					response.mBody = textBody;
+				}
 
 				// callback attached to request
 				mHandleMap[curlInstance].mCallback(&response, this);
@@ -210,7 +254,7 @@ void HTTPClient::updateThreads() {
 void HTTPClient::loadRequest() {
 	HTTPRequest request = mRequestQueue.front();
 	
-	//makeStringSafe(request.mParameterString);
+	//makeStringSafe(request.mRequestBody);
 
 	CURL* c = curl_easy_init();
 	setOptions(c, request);
@@ -218,46 +262,51 @@ void HTTPClient::loadRequest() {
 	mHandleMap[c] = request;
 
 	CURLMcode multiCode;
-	curl_multi_add_handle(mMultiCurl, c);
+	multiCode = curl_multi_add_handle(mMultiCurl, c);
+	checkForMultiErrors(multiCode);
 
 	mRequestQueue.pop();
 }
 
-void HTTPClient::setOptions(CURL* curl, const HTTPRequest request) {
+void HTTPClient::setOptions(CURL* curl, const HTTPRequest &request) {
+	if (!mMultiCurl) {
+		std::printf("midnight-HTTP::HTTPClient ERROR: MultiCurl hasn't been instantiated!");
+	}
+
 	CURLcode curlCode;
-	
-	/*
-	struct curl_slist *slist = NULL;
-	slist = curl_slist_append(slist, "Content-Type: application/json");
-	curlCode = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, slist);
-	checkForErrors(curlCode);
-	*/
 
-	curlCode = curl_easy_setopt(curl, CURLOPT_HEADER, 1);
+	struct curl_slist *headers = NULL;
+	headers = curl_slist_append(headers, "Content-Type: application/json");
+	curlCode = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 	checkForErrors(curlCode);
 
+	curlCode = curl_easy_setopt(curl, CURLOPT_HEADER, 0);
+	checkForErrors(curlCode);
 	curlCode = curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1);
 	checkForErrors(curlCode);
-	mResponseBuffer.clear();
-	curlCode = curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2);
-	checkForErrors(curlCode);
+	//curlCode = curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2);
+	//checkForErrors(curlCode);
 	curlCode = curl_easy_setopt(curl, CURLOPT_USERAGENT, mUserAgent.c_str());
 	checkForErrors(curlCode);
-	curlCode = curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0); // this line makes it work under https
-	checkForErrors(curlCode);
+	//curlCode = curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0); // this line makes it work under https
+	//checkForErrors(curlCode);
+
 
 	if (request.mTarget == MEMORY) {
 		curlCode = curl_easy_setopt(curl, CURLOPT_WRITEDATA, &mResponseBuffer);
 		checkForErrors(curlCode);
 		curlCode = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &writeToMemory);
 		checkForErrors(curlCode);
-
-		curlCode = curl_easy_setopt(curl, CURLOPT_WRITEHEADER, &mHeaderBuffer);
+		curlCode = curl_easy_setopt(curl, CURLOPT_HEADERDATA, &mHeaderBuffer);
 		checkForErrors(curlCode);
 		curlCode = curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, &writeToHeaders);
 		checkForErrors(curlCode);
 	}
 	else if (request.mTarget == FILE) {
+		// write headers to file also
+		curlCode = curl_easy_setopt(curl, CURLOPT_HEADER, 1);
+		checkForErrors(curlCode);
+
 		mFile = std::fopen(request.mFilename.c_str(), "w");
 		if (mFile == NULL) {
 			std::printf("midnight-HTTP::HTTPClient ERROR: Cannot open file %s\n", request.mFilename.c_str());
@@ -266,36 +315,35 @@ void HTTPClient::setOptions(CURL* curl, const HTTPRequest request) {
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &writeToFile);
 	}
 
-	if (!mMultiCurl) {
-		std::printf("midnight-HTTP::HTTPClient ERROR: MultiCurl hasn't been instantiated!");
-	}
-
-	std::string param_url = request.mUrl + "?" + request.mParameterString;
-
 	switch (request.mMethod) {
 	case HTTP_POST:
 		curlCode = curl_easy_setopt(curl, CURLOPT_POST, 1);
 		checkForErrors(curlCode);
-		curlCode = curl_easy_setopt(curl, CURLOPT_POSTFIELDS, request.mParameterString.c_str());
-		checkForErrors(curlCode);
-		curlCode = curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, strlen(request.mParameterString.c_str()));
-		checkForErrors(curlCode);
 		curlCode = curl_easy_setopt(curl, CURLOPT_URL, request.mUrl.c_str());
 		checkForErrors(curlCode);
-		std::printf("%s\n", request.mUrl.c_str());
+		curlCode = curl_easy_setopt(curl, CURLOPT_POSTFIELDS, request.mRequestBody.c_str());
+		checkForErrors(curlCode);
+		curlCode = curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, strlen(request.mRequestBody.c_str()));
+		checkForErrors(curlCode);
 		break;
 	case HTTP_GET:
 		curlCode = curl_easy_setopt(curl, CURLOPT_URL, request.mUrl.c_str());
 		checkForErrors(curlCode);
+		if (!request.mRequestBody.empty()) {
+			curlCode = curl_easy_setopt(curl, CURLOPT_POSTFIELDS, request.mRequestBody.c_str());
+			checkForErrors(curlCode);
+			curlCode = curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, strlen(request.mRequestBody.c_str()));
+			checkForErrors(curlCode);
+		}
 		break;
 	case HTTP_PUT:
 		curlCode = curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
 		checkForErrors(curlCode);
-		curlCode = curl_easy_setopt(curl, CURLOPT_POSTFIELDS, request.mParameterString.c_str());
-		checkForErrors(curlCode);
-		curlCode = curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, strlen(request.mParameterString.c_str()));
-		checkForErrors(curlCode);
 		curlCode = curl_easy_setopt(curl, CURLOPT_URL, request.mUrl.c_str());
+		checkForErrors(curlCode);
+		curlCode = curl_easy_setopt(curl, CURLOPT_POSTFIELDS, request.mRequestBody.c_str());
+		checkForErrors(curlCode);
+		curlCode = curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, strlen(request.mRequestBody.c_str()));
 		checkForErrors(curlCode);
 		break;
 	case HTTP_DELETE:
@@ -303,16 +351,25 @@ void HTTPClient::setOptions(CURL* curl, const HTTPRequest request) {
 		checkForErrors(curlCode);
 		curlCode = curl_easy_setopt(curl, CURLOPT_URL, request.mUrl.c_str());
 		checkForErrors(curlCode);
-		curlCode = curl_easy_setopt(curl, CURLOPT_POSTFIELDS, request.mParameterString.c_str());
+		curlCode = curl_easy_setopt(curl, CURLOPT_POSTFIELDS, request.mRequestBody.c_str());
 		checkForErrors(curlCode);
-		curlCode = curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, strlen(request.mParameterString.c_str()));
+		curlCode = curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, strlen(request.mRequestBody.c_str()));
 		checkForErrors(curlCode);
 		break;
-	case HTTP_HEAD:
-		curlCode = curl_easy_setopt(curl, CURLOPT_NOBODY, 1);
+	case HTTP_HEADERS:
+		curlCode = curl_easy_setopt(curl, CURLOPT_URL, request.mUrl.c_str());
+		checkForErrors(curlCode);
+		break;
+	case HTTP_PATCH:
+		curlCode = curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PATCH");
 		checkForErrors(curlCode);
 		curlCode = curl_easy_setopt(curl, CURLOPT_URL, request.mUrl.c_str());
 		checkForErrors(curlCode);
+		curlCode = curl_easy_setopt(curl, CURLOPT_POSTFIELDS, request.mRequestBody.c_str());
+		checkForErrors(curlCode);
+		curlCode = curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, strlen(request.mRequestBody.c_str()));
+		checkForErrors(curlCode);
+		break;
 	default:
 		std::printf("midnight-HTTP::HTTPClient HTTP Method not implemented.\n");
 		break;
