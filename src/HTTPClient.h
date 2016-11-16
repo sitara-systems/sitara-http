@@ -15,7 +15,7 @@
 namespace midnight {
 	namespace http {
 
-		enum HTTPMethod {
+		enum HttpMethod {
 			HTTP_NONE,
 			HTTP_DELETE,
 			HTTP_PUT,
@@ -31,33 +31,33 @@ namespace midnight {
 		};
 
 		//forward declare
-		struct HTTPResponse;
-		class HTTPClient;
+		struct HttpResponse;
+		class HttpClient;
 
-		struct HTTPRequest {
-			HTTPRequest() : mMethod(HTTP_NONE), mUrl(""), mRequestBody(""), mTarget(MEMORY), mFilename(""), mCallback(NULL) {};
+		struct HttpRequest {
+			HttpRequest() : mMethod(HTTP_NONE), mUrl(""), mRequestBody(""), mTarget(MEMORY), mFilename(""), mCallback(NULL) {};
 
-			HTTPMethod mMethod;
+			HttpMethod mMethod;
 			std::string mUrl;
 			std::string mRequestBody;
 			DataTarget mTarget;
 			std::string mFilename;
-			std::function<void(HTTPResponse*, HTTPClient*)> mCallback;
+			std::function<void(HttpResponse*, HttpClient*)> mCallback;
 		};
 
-		struct HTTPResponse {
+		struct HttpResponse {
 			long mResponseCode;
 			Json::Value mBody;
 			Json::Value mHeaders;
-			HTTPRequest mRequest;
+			HttpRequest mRequest;
 		};
 
-		class HTTPClient {
+		class HttpClient {
 		public:
-			static std::shared_ptr<HTTPClient> make();
-			~HTTPClient();
-			HTTPResponse makeRequest(const HTTPRequest &request);
-			void addHTTPRequest(const HTTPRequest request);
+			static std::shared_ptr<HttpClient> make();
+			~HttpClient();
+			HttpResponse makeRequest(const HttpRequest &request);
+			void addHttpRequest(const HttpRequest request);
 			size_t getNumberOfRequests();
 			void setMaxNumberOfThreads(int numThreads);
 			int getMaxNumberOfThreads();
@@ -65,14 +65,14 @@ namespace midnight {
 			std::string getUserAgent();
 			std::string mapToString(const std::map<std::string, std::string> &map);
 			void makeStringSafe(std::string &input);
-			std::string methodToString(const HTTPMethod &method);
+			std::string methodToString(const HttpMethod &method);
 			std::string jsonToString(const Json::Value &value);
 			Json::Value stringToJson(const std::string &string);
 		protected:
-			HTTPClient();
+			HttpClient();
 			void updateThreads();
 			void loadRequest();
-			void setOptions(CURL* curl, const HTTPRequest &request);
+			void setOptions(CURL* curl, const HttpRequest &request);
 			void checkForErrors(const CURLcode error_code);
 			void checkForMultiErrors(const CURLMcode error_code);
 			static size_t writeToMemory(const char* contents, size_t size, size_t nmemb, std::string* buffer);
@@ -93,8 +93,8 @@ namespace midnight {
 			std::thread mUpdateThread;
 			std::mutex mUpdateMutex;
 			std::string mUserAgent;
-			std::map<CURL*, HTTPRequest> mHandleMap;
-			std::queue<HTTPRequest> mRequestQueue;
+			std::map<CURL*, HttpRequest> mHandleMap;
+			std::queue<HttpRequest> mRequestQueue;
 			static const int MAX_WAIT_MSECS = 30000;
 		};
 	}

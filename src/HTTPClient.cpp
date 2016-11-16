@@ -1,13 +1,13 @@
-#include "HTTPClient.h"
+#include "HttpClient.h"
 
 using namespace midnight::http;
 
-std::shared_ptr<HTTPClient> HTTPClient::make() {
-	std::shared_ptr<HTTPClient> client(new HTTPClient());
+std::shared_ptr<HttpClient> HttpClient::make() {
+	std::shared_ptr<HttpClient> client(new HttpClient());
 	return client;
 }
 
-HTTPClient::HTTPClient() : mErrorBuffer(CURL_ERROR_SIZE) {
+HttpClient::HttpClient() : mErrorBuffer(CURL_ERROR_SIZE) {
 	mMaxNumberOfThreads = 15;
 	mCurrentNumberOfThreads = 0;
 	curl_global_init(CURL_GLOBAL_ALL);
@@ -18,16 +18,16 @@ HTTPClient::HTTPClient() : mErrorBuffer(CURL_ERROR_SIZE) {
 	multiCode = curl_multi_setopt(mMultiCurl, CURLMOPT_MAXCONNECTS, mMaxNumberOfThreads);
 	checkForMultiErrors(multiCode);
 	mUserAgent = "Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)";
-	mUpdateThread = std::thread(&HTTPClient::updateThreads, this);
+	mUpdateThread = std::thread(&HttpClient::updateThreads, this);
 	mFile = NULL;
 }
 
-HTTPClient::~HTTPClient() {
+HttpClient::~HttpClient() {
 	curl_multi_cleanup(mMultiCurl);
 	curl_global_cleanup();
 }
 
-HTTPResponse HTTPClient::makeRequest(const HTTPRequest &request) {
+HttpResponse HttpClient::makeRequest(const HttpRequest &request) {
 	/*
 	Makes a blocking request.  This function will cause your program to wait for the request to be completed and then return a string.
 	*/
@@ -38,7 +38,7 @@ HTTPResponse HTTPClient::makeRequest(const HTTPRequest &request) {
 	checkForErrors(curlCode);
 
 	
-	HTTPResponse response;
+	HttpResponse response;
 	
 	// corresponding request
 	response.mRequest = request;
@@ -78,7 +78,7 @@ HTTPResponse HTTPClient::makeRequest(const HTTPRequest &request) {
 }
 
 
-void HTTPClient::addHTTPRequest(const HTTPRequest request) {
+void HttpClient::addHttpRequest(const HttpRequest request) {
 	/*
 	Adds a non-blocking request to the request queue.  Requests will be made when a spot in the queue is available, and then the callback attached to the request object will be called.
 	*/
@@ -87,30 +87,30 @@ void HTTPClient::addHTTPRequest(const HTTPRequest request) {
 	mUpdateMutex.unlock();
 }
 
-size_t HTTPClient::getNumberOfRequests() {
+size_t HttpClient::getNumberOfRequests() {
 	return mRequestQueue.size();
 }
 
-void HTTPClient::setMaxNumberOfThreads(int numThreads) {
+void HttpClient::setMaxNumberOfThreads(int numThreads) {
 	mMaxNumberOfThreads = numThreads;
 	CURLMcode multiCode;
 	multiCode = curl_multi_setopt(mMultiCurl, CURLMOPT_MAXCONNECTS, mMaxNumberOfThreads);
 	checkForMultiErrors(multiCode);
 }
 
-int HTTPClient::getMaxNumberOfThreads() {
+int HttpClient::getMaxNumberOfThreads() {
 	return mMaxNumberOfThreads;
 }
 
-void HTTPClient::setUserAgent(const std::string &agent) {
+void HttpClient::setUserAgent(const std::string &agent) {
 	mUserAgent = agent;
 }
 
-std::string HTTPClient::getUserAgent() {
+std::string HttpClient::getUserAgent() {
 	return mUserAgent;
 }
 
-std::string HTTPClient::mapToString(const std::map<std::string, std::string> &map) {
+std::string HttpClient::mapToString(const std::map<std::string, std::string> &map) {
 	std::string output = "";
 
 	for (auto it = map.begin(); it != map.end(); ++it) {
@@ -127,11 +127,11 @@ std::string HTTPClient::mapToString(const std::map<std::string, std::string> &ma
 	return output;
 }
 
-void HTTPClient::makeStringSafe(std::string &input) {
+void HttpClient::makeStringSafe(std::string &input) {
 	input = curl_easy_escape(mMultiCurl, input.c_str(), 0);
 }
 
-std::string HTTPClient::methodToString(const HTTPMethod &method) {
+std::string HttpClient::methodToString(const HttpMethod &method) {
 	switch (method) {
 	case HTTP_DELETE:
 		return "DELETE";
@@ -150,16 +150,16 @@ std::string HTTPClient::methodToString(const HTTPMethod &method) {
 	}
 }
 
-std::string HTTPClient::jsonToString(const Json::Value &value) {
+std::string HttpClient::jsonToString(const Json::Value &value) {
 	std::string output = mJsonWriter.write(value);
 	return output;
 }
 
-Json::Value HTTPClient::stringToJson(const std::string &string) {
+Json::Value HttpClient::stringToJson(const std::string &string) {
 	Json::Value output;
 	bool parsingSuccessful = mJsonReader.parse(mResponseBuffer, output);
 	if (!parsingSuccessful) {
-		std::printf("midnight-HTTP::HTTPClient ERROR: Failed to parse JSON %s\n", mJsonReader.getFormattedErrorMessages().c_str());
+		std::printf("midnight-http::HttpClient ERROR: Failed to parse JSON %s\n", mJsonReader.getFormattedErrorMessages().c_str());
 		return NULL;
 	}
 	else {
@@ -168,7 +168,7 @@ Json::Value HTTPClient::stringToJson(const std::string &string) {
 }
 
 
-void HTTPClient::updateThreads() {
+void HttpClient::updateThreads() {
 	while (true) {
 		CURLMcode multiCode;
 		mUpdateMutex.lock();
@@ -199,7 +199,7 @@ void HTTPClient::updateThreads() {
 				curlCode = message->data.result;
 				checkForErrors(curlCode);
 
-				HTTPResponse response;
+				HttpResponse response;
 				
 				// corresponding request
 				response.mRequest = mHandleMap[curlInstance];
@@ -244,15 +244,15 @@ void HTTPClient::updateThreads() {
 				curl_easy_cleanup(curlInstance);
 			}
 			else {
-				std::printf("midnight-HTTP::HTTPClient ERROR: After curl_multi_info_read(), CURLMsg=%d\n", message->msg);
+				std::printf("midnight-Http::HttpClient ERROR: After curl_multi_info_read(), CURLMsg=%d\n", message->msg);
 			}
 		}
 
 	}
 }
 
-void HTTPClient::loadRequest() {
-	HTTPRequest request = mRequestQueue.front();
+void HttpClient::loadRequest() {
+	HttpRequest request = mRequestQueue.front();
 	
 	//makeStringSafe(request.mRequestBody);
 
@@ -268,9 +268,9 @@ void HTTPClient::loadRequest() {
 	mRequestQueue.pop();
 }
 
-void HTTPClient::setOptions(CURL* curl, const HTTPRequest &request) {
+void HttpClient::setOptions(CURL* curl, const HttpRequest &request) {
 	if (!mMultiCurl) {
-		std::printf("midnight-HTTP::HTTPClient ERROR: MultiCurl hasn't been instantiated!");
+		std::printf("midnight-Http::HttpClient ERROR: MultiCurl hasn't been instantiated!");
 	}
 
 	CURLcode curlCode;
@@ -288,7 +288,7 @@ void HTTPClient::setOptions(CURL* curl, const HTTPRequest &request) {
 	//checkForErrors(curlCode);
 	curlCode = curl_easy_setopt(curl, CURLOPT_USERAGENT, mUserAgent.c_str());
 	checkForErrors(curlCode);
-	//curlCode = curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0); // this line makes it work under https
+	//curlCode = curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0); // this line makes it work under Https
 	//checkForErrors(curlCode);
 
 
@@ -309,7 +309,7 @@ void HTTPClient::setOptions(CURL* curl, const HTTPRequest &request) {
 
 		mFile = std::fopen(request.mFilename.c_str(), "w");
 		if (mFile == NULL) {
-			std::printf("midnight-HTTP::HTTPClient ERROR: Cannot open file %s\n", request.mFilename.c_str());
+			std::printf("midnight-Http::HttpClient ERROR: Cannot open file %s\n", request.mFilename.c_str());
 		}
 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, mFile);
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &writeToFile);
@@ -371,42 +371,42 @@ void HTTPClient::setOptions(CURL* curl, const HTTPRequest &request) {
 		checkForErrors(curlCode);
 		break;
 	default:
-		std::printf("midnight-HTTP::HTTPClient HTTP Method not implemented.\n");
+		std::printf("midnight-Http::HttpClient Http Method not implemented.\n");
 		break;
 	}
 }
 
-void HTTPClient::checkForErrors(const CURLcode error_code) {
+void HttpClient::checkForErrors(const CURLcode error_code) {
 	std::string errorString = curl_easy_strerror(error_code);
 	if (error_code != CURLE_OK) {
-		std::printf("midnight-HTTP::HTTPClient ERROR: cURL failed: %s\n", errorString.c_str());
+		std::printf("midnight-Http::HttpClient ERROR: cURL failed: %s\n", errorString.c_str());
 	}
 }
 
-void HTTPClient::checkForMultiErrors(const CURLMcode error_code) {
+void HttpClient::checkForMultiErrors(const CURLMcode error_code) {
 	std::string errorString = curl_multi_strerror(error_code);
 	if (error_code != CURLM_OK) {
-		std::printf("midnight-HTTP::HTTPClient ERROR: multi-cURL failed: %s\n", errorString.c_str());
+		std::printf("midnight-Http::HttpClient ERROR: multi-cURL failed: %s\n", errorString.c_str());
 	}
 }
 
-size_t HTTPClient::writeToMemory(const char* contents, size_t size, size_t nmemb, std::string* buffer) {
+size_t HttpClient::writeToMemory(const char* contents, size_t size, size_t nmemb, std::string* buffer) {
 	size_t realsize = size * nmemb;
 	buffer->append(contents, realsize);
 	return realsize;
 }
 
-size_t HTTPClient::writeToFile(const char* contents, size_t size, size_t nmemb, std::FILE* stream) {
+size_t HttpClient::writeToFile(const char* contents, size_t size, size_t nmemb, std::FILE* stream) {
 	return std::fwrite(contents, size, nmemb, stream);
 }
 
-size_t HTTPClient::writeToHeaders(const char *contents, size_t size, size_t nmemb, std::string* data) {
+size_t HttpClient::writeToHeaders(const char *contents, size_t size, size_t nmemb, std::string* data) {
 	size_t realsize = size * nmemb;
 	data->append(contents, realsize);
 	return realsize;
 }
 
-void HTTPClient::splitString(const std::string &string, char delimiter, std::vector<std::string> &output) {
+void HttpClient::splitString(const std::string &string, char delimiter, std::vector<std::string> &output) {
 	std::stringstream ss;
 	ss.str(string);
 	std::string item;
@@ -415,13 +415,13 @@ void HTTPClient::splitString(const std::string &string, char delimiter, std::vec
 	}
 }
 
-std::vector<std::string> HTTPClient::splitString(const std::string &string, char delimiter) {
+std::vector<std::string> HttpClient::splitString(const std::string &string, char delimiter) {
 	std::vector<std::string> output;
 	splitString(string, delimiter, output);
 	return output;
 }
 
-void HTTPClient::cleanupString(std::string &string) {
+void HttpClient::cleanupString(std::string &string) {
 	while (!string.empty() && std::isspace(*string.begin()))
 		string.erase(string.begin());
 
