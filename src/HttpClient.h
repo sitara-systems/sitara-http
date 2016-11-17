@@ -83,7 +83,7 @@ namespace midnight {
 			static void cleanupString(std::string &string);
 			CURL* mMultiCurl;
 			Json::Reader mJsonReader;
-			Json::StyledWriter mJsonWriter;
+			Json::FastWriter mJsonWriter;
 			int mMaxNumberOfThreads;
 			int mCurrentNumberOfThreads;
 			std::FILE* mFile;

@@ -276,7 +276,7 @@ void HttpClient::setOptions(CURL* curl, const HttpRequest &request) {
 	CURLcode curlCode;
 
 	struct curl_slist *headers = NULL;
-	headers = curl_slist_append(headers, "Content-Type: application/json");
+	headers = curl_slist_append(headers, "Content-Type: application/json; charset=UTF-8");
 	curlCode = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 	checkForErrors(curlCode);
 
@@ -321,18 +321,19 @@ void HttpClient::setOptions(CURL* curl, const HttpRequest &request) {
 		checkForErrors(curlCode);
 		curlCode = curl_easy_setopt(curl, CURLOPT_URL, request.mUrl.c_str());
 		checkForErrors(curlCode);
-		curlCode = curl_easy_setopt(curl, CURLOPT_POSTFIELDS, request.mRequestBody.c_str());
-		checkForErrors(curlCode);
 		curlCode = curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, strlen(request.mRequestBody.c_str()));
+		checkForErrors(curlCode);
+		// NOTE -- using COPYPOSTFIELDS because the multicurl handle is running on a separate thread and we need to guarantee the data still exists.
+		curlCode = curl_easy_setopt(curl, CURLOPT_COPYPOSTFIELDS, request.mRequestBody.c_str());
 		checkForErrors(curlCode);
 		break;
 	case HTTP_GET:
 		curlCode = curl_easy_setopt(curl, CURLOPT_URL, request.mUrl.c_str());
 		checkForErrors(curlCode);
 		if (!request.mRequestBody.empty()) {
-			curlCode = curl_easy_setopt(curl, CURLOPT_POSTFIELDS, request.mRequestBody.c_str());
-			checkForErrors(curlCode);
 			curlCode = curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, strlen(request.mRequestBody.c_str()));
+			checkForErrors(curlCode);
+			curlCode = curl_easy_setopt(curl, CURLOPT_COPYPOSTFIELDS, request.mRequestBody.c_str());
 			checkForErrors(curlCode);
 		}
 		break;
@@ -341,9 +342,9 @@ void HttpClient::setOptions(CURL* curl, const HttpRequest &request) {
 		checkForErrors(curlCode);
 		curlCode = curl_easy_setopt(curl, CURLOPT_URL, request.mUrl.c_str());
 		checkForErrors(curlCode);
-		curlCode = curl_easy_setopt(curl, CURLOPT_POSTFIELDS, request.mRequestBody.c_str());
-		checkForErrors(curlCode);
 		curlCode = curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, strlen(request.mRequestBody.c_str()));
+		checkForErrors(curlCode);
+		curlCode = curl_easy_setopt(curl, CURLOPT_COPYPOSTFIELDS, request.mRequestBody.c_str());
 		checkForErrors(curlCode);
 		break;
 	case HTTP_DELETE:
@@ -351,9 +352,9 @@ void HttpClient::setOptions(CURL* curl, const HttpRequest &request) {
 		checkForErrors(curlCode);
 		curlCode = curl_easy_setopt(curl, CURLOPT_URL, request.mUrl.c_str());
 		checkForErrors(curlCode);
-		curlCode = curl_easy_setopt(curl, CURLOPT_POSTFIELDS, request.mRequestBody.c_str());
-		checkForErrors(curlCode);
 		curlCode = curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, strlen(request.mRequestBody.c_str()));
+		checkForErrors(curlCode);
+		curlCode = curl_easy_setopt(curl, CURLOPT_COPYPOSTFIELDS, request.mRequestBody.c_str());
 		checkForErrors(curlCode);
 		break;
 	case HTTP_HEADERS:
@@ -365,9 +366,9 @@ void HttpClient::setOptions(CURL* curl, const HttpRequest &request) {
 		checkForErrors(curlCode);
 		curlCode = curl_easy_setopt(curl, CURLOPT_URL, request.mUrl.c_str());
 		checkForErrors(curlCode);
-		curlCode = curl_easy_setopt(curl, CURLOPT_POSTFIELDS, request.mRequestBody.c_str());
-		checkForErrors(curlCode);
 		curlCode = curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, strlen(request.mRequestBody.c_str()));
+		checkForErrors(curlCode);
+		curlCode = curl_easy_setopt(curl, CURLOPT_COPYPOSTFIELDS, request.mRequestBody.c_str());
 		checkForErrors(curlCode);
 		break;
 	default:
