@@ -57,7 +57,7 @@ namespace midnight {
 			static std::shared_ptr<HttpClient> make();
 			~HttpClient();
 			HttpResponse makeRequest(const HttpRequest &request);
-			void addHttpRequest(const HttpRequest request);
+			void addHttpRequest(const HttpRequest &request);
 			size_t getNumberOfRequests();
 			void setMaxNumberOfThreads(int numThreads);
 			int getMaxNumberOfThreads();
@@ -75,6 +75,7 @@ namespace midnight {
 			void setOptions(CURL* curl, const HttpRequest &request);
 			void checkForErrors(const CURLcode error_code);
 			void checkForMultiErrors(const CURLMcode error_code);
+			void cleanupRequest(CURL* curl);
 			static size_t writeToMemory(const char* contents, size_t size, size_t nmemb, std::string* buffer);
 			static size_t writeToFile(const char* contents, size_t size, size_t nmemb, std::FILE* stream);
 			static size_t writeToHeaders(const char *contents, size_t size, size_t nmemb, std::string* data);
@@ -87,13 +88,12 @@ namespace midnight {
 			int mMaxNumberOfThreads;
 			int mCurrentNumberOfThreads;
 			std::FILE* mFile;
-			std::string mResponseBuffer;
-			std::string mHeaderBuffer;
-			std::vector<char> mErrorBuffer;
 			std::thread mUpdateThread;
 			std::mutex mUpdateMutex;
 			std::string mUserAgent;
 			std::map<CURL*, HttpRequest> mHandleMap;
+			std::map<CURL*, std::string> mResponseBodyMap;
+			std::map<CURL*, std::string> mResponseHeaderMap;
 			std::queue<HttpRequest> mRequestQueue;
 			static const int MAX_WAIT_MSECS = 30000;
 		};

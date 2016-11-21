@@ -7,13 +7,11 @@ std::shared_ptr<HttpClient> HttpClient::make() {
 	return client;
 }
 
-HttpClient::HttpClient() : mErrorBuffer(CURL_ERROR_SIZE) {
+HttpClient::HttpClient() {
 	mMaxNumberOfThreads = 15;
 	mCurrentNumberOfThreads = 0;
 	curl_global_init(CURL_GLOBAL_ALL);
 	mMultiCurl = curl_multi_init();
-	mResponseBuffer = "";
-	mHeaderBuffer = "";
 	CURLMcode multiCode;
 	multiCode = curl_multi_setopt(mMultiCurl, CURLMOPT_MAXCONNECTS, mMaxNumberOfThreads);
 	checkForMultiErrors(multiCode);
@@ -37,7 +35,6 @@ HttpResponse HttpClient::makeRequest(const HttpRequest &request) {
 	CURLcode curlCode = curl_easy_perform(c);
 	checkForErrors(curlCode);
 
-	
 	HttpResponse response;
 	
 	// corresponding request
@@ -48,7 +45,7 @@ HttpResponse HttpClient::makeRequest(const HttpRequest &request) {
 	checkForErrors(curlCode);
 
 	// response headers
-	std::vector<std::string> headerLines = splitString(mHeaderBuffer, '\n');
+	std::vector<std::string> headerLines = splitString(mResponseHeaderMap[c], '\n');
 	for (auto &line : headerLines) {
 		std::vector<std::string> pair = splitString(line, ':');
 		if (pair.size() == 2) {
@@ -59,18 +56,20 @@ HttpResponse HttpClient::makeRequest(const HttpRequest &request) {
 	}
 
 	// response body
-	Json::Value body = stringToJson(mResponseBuffer);
+	Json::Value body = stringToJson(mResponseBodyMap[c]);
 	if (body != NULL) {
 		response.mBody = body;
 	}
 	else {
 		Json::Value textBody;
-		textBody["response_body"] = mResponseBuffer;
+		textBody["response_body"] = mResponseBodyMap[c];
 		response.mBody = textBody;
 	}
 
 	// callback attached to request
 	request.mCallback(&response, this);
+
+	cleanupRequest(c);
 
 	curl_easy_cleanup(c);
 
@@ -78,7 +77,7 @@ HttpResponse HttpClient::makeRequest(const HttpRequest &request) {
 }
 
 
-void HttpClient::addHttpRequest(const HttpRequest request) {
+void HttpClient::addHttpRequest(const HttpRequest &request) {
 	/*
 	Adds a non-blocking request to the request queue.  Requests will be made when a spot in the queue is available, and then the callback attached to the request object will be called.
 	*/
@@ -157,7 +156,7 @@ std::string HttpClient::jsonToString(const Json::Value &value) {
 
 Json::Value HttpClient::stringToJson(const std::string &string) {
 	Json::Value output;
-	bool parsingSuccessful = mJsonReader.parse(mResponseBuffer, output);
+	bool parsingSuccessful = mJsonReader.parse(string, output);
 	if (!parsingSuccessful) {
 		std::printf("midnight-http::HttpClient ERROR: Failed to parse JSON %s\n", mJsonReader.getFormattedErrorMessages().c_str());
 		return NULL;
@@ -174,6 +173,7 @@ void HttpClient::updateThreads() {
 		mUpdateMutex.lock();
 		while (mCurrentNumberOfThreads < mMaxNumberOfThreads && mRequestQueue.size() > 0) {
 			loadRequest();
+			std::printf("Adding request; current requests are at %d / %d\n", mCurrentNumberOfThreads, mMaxNumberOfThreads);
 		}
 		mUpdateMutex.unlock();
 		do {
@@ -209,7 +209,7 @@ void HttpClient::updateThreads() {
 				checkForErrors(curlCode);
 
 				// response headers
-				std::vector<std::string> headerLines = splitString(mHeaderBuffer, '\n');
+				std::vector<std::string> headerLines = splitString(mResponseHeaderMap[curlInstance], '\n');
 				for (auto &line : headerLines) {
 					std::vector<std::string> pair = splitString(line, ':');
 					if (pair.size() == 2) {
@@ -220,26 +220,21 @@ void HttpClient::updateThreads() {
 				}
 
 				// response body
-				Json::Value body = stringToJson(mResponseBuffer);
+				Json::Value body = stringToJson(mResponseBodyMap[curlInstance]);
 				if (body != NULL) {
 					response.mBody = body;
 				}
 				else {
 					Json::Value textBody;
-					textBody["response_body"] = mResponseBuffer;
+					textBody["response_body"] = mResponseBodyMap[curlInstance];
 					response.mBody = textBody;
 				}
 
 				// callback attached to request
 				mHandleMap[curlInstance].mCallback(&response, this);
 
-				// cleanup
-				if (mFile != NULL) {
-					std::fclose(mFile);
-				}
-				else {
-					mResponseBuffer.clear();
-				}
+				cleanupRequest(curlInstance);
+
 				curl_multi_remove_handle(mMultiCurl, curlInstance);
 				curl_easy_cleanup(curlInstance);
 			}
@@ -266,6 +261,7 @@ void HttpClient::loadRequest() {
 	checkForMultiErrors(multiCode);
 
 	mRequestQueue.pop();
+	mCurrentNumberOfThreads++;
 }
 
 void HttpClient::setOptions(CURL* curl, const HttpRequest &request) {
@@ -293,11 +289,11 @@ void HttpClient::setOptions(CURL* curl, const HttpRequest &request) {
 
 
 	if (request.mTarget == MEMORY) {
-		curlCode = curl_easy_setopt(curl, CURLOPT_WRITEDATA, &mResponseBuffer);
+		curlCode = curl_easy_setopt(curl, CURLOPT_WRITEDATA, &mResponseBodyMap[curl]);
 		checkForErrors(curlCode);
 		curlCode = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &writeToMemory);
 		checkForErrors(curlCode);
-		curlCode = curl_easy_setopt(curl, CURLOPT_HEADERDATA, &mHeaderBuffer);
+		curlCode = curl_easy_setopt(curl, CURLOPT_HEADERDATA, &mResponseHeaderMap[curl]);
 		checkForErrors(curlCode);
 		curlCode = curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, &writeToHeaders);
 		checkForErrors(curlCode);
@@ -391,6 +387,22 @@ void HttpClient::checkForMultiErrors(const CURLMcode error_code) {
 	}
 }
 
+void HttpClient::cleanupRequest(CURL* curl) {
+	// clean up request map, response map, header map
+	HttpRequest request = mHandleMap[curl];
+
+	if (request.mTarget == FILE) {
+		std::fclose(mFile);
+	}
+	else {
+		mResponseBodyMap.erase(curl);
+	}
+
+	mResponseHeaderMap.erase(curl);
+	mHandleMap.erase(curl);
+}
+
+
 size_t HttpClient::writeToMemory(const char* contents, size_t size, size_t nmemb, std::string* buffer) {
 	size_t realsize = size * nmemb;
 	buffer->append(contents, realsize);
@@ -413,7 +425,7 @@ void HttpClient::splitString(const std::string &string, char delimiter, std::vec
 	std::string item;
 	while (std::getline(ss, item, delimiter)) {
 		output.push_back(item);
-	}
+		}
 }
 
 std::vector<std::string> HttpClient::splitString(const std::string &string, char delimiter) {
