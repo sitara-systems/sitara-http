@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <cinder>
 <block
-	name="ofxCurl;"
-	id="org.libcinder.ofxcurl"
-  git="https://github.com/morphogencc/ofxCurl.git"
+	name="midcomm-HTTP;"
+	id="org.libcinder.midcomm-HTTP"
+  git="https://github.com/MidnightCommercial/midcomm-HTTP.git"
 	author="Midnight Commercial, nathan lachenmyer"
 	summary="Implements both single- and multi-threaded requests using cURL."
 	license="MIT"
-  url="https://github.com/morphogencc/ofxCurl"
+  url="https://github.com/MidnightCommercial/midcomm-HTTP"
   library="https://curl.haxx.se/libcurl/"
   core="true"
 	>

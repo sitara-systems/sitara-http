@@ -1,11 +1,12 @@
 #include "cinder/app/App.h"
 #include "cinder/app/RendererGl.h"
 #include "cinder/gl/gl.h"
-#include "HTTPClient.h"
+#include "HttpClient.h"
 
 using namespace ci;
 using namespace ci::app;
 using namespace std;
+using namespace midnight::http;
 
 class cinder_multiRequestApp : public App {
 public:
@@ -14,62 +15,58 @@ public:
 	void update() override;
 	void draw() override;
 
-	std::shared_ptr<Curl::HTTPClient> mCurl;
+	std::shared_ptr<HttpClient> mCurl;
 	double mTime;
 };
 
 void cinder_multiRequestApp::setup() {
 	mTime = cinder::app::getElapsedSeconds();
 
-	mCurl = Curl::HTTPClient::make();
+	mCurl = HttpClient::make();
 
 	std::map<std::string, std::string> requestParameters;
 	requestParameters["foo"] = "bar baz";
 
 	std::printf("Loading GET request...\n");
 
-	Curl::HTTPRequest Get;
+	HttpRequest Get;
 	Get.mUrl = "http://www.httpbin.org/get";
-	Get.mMethod = Curl::HTTP_GET;
-	Get.mParameterString = mCurl->mapToString(requestParameters);
-	Get.mCallback = [=](Curl::HTTPResponse* response, Curl::HTTPClient* curl) { std::printf("Request complete with code %d; headers are %s\n", response->mResponseCode, curl->JsonToString(response->mHeaders).c_str()); };
-	mCurl->addHTTPRequest(Get);
+	Get.mMethod = HTTP_GET;
+s	Get.mCallback = [=](HttpResponse* response, HttpClient* curl) { std::printf("Request complete with code %d; headers are %s\n", response->mResponseCode, curl->jsonToString(response->mHeaders).c_str()); };
+	mCurl->addHttpRequest(Get);
 
+	/*
 	std::printf("Loading POST request...\n");
 
-	Curl::HTTPRequest Post;
-	Post.mUrl = "http://www.httpbin.org/post";
-	Post.mMethod = Curl::HTTP_POST;
-	Post.mParameterString = "";
-	Post.mCallback = [=](Curl::HTTPResponse* response, Curl::HTTPClient* curl) { std::printf("Request complete with code %d; headers are %s\n", response->mResponseCode, curl->JsonToString(response->mHeaders).c_str()); };
-	mCurl->addHTTPRequest(Post);
+	HttpRequest Post;
+	Post.mUrl = "http://www.Httpbin.org/post";
+	Post.mMethod = HTTP_POST;
+	Post.mCallback = [=](HttpResponse* response, HttpClient* curl) { std::printf("Request complete with code %d; headers are %s\n", response->mResponseCode, curl->jsonToString(response->mHeaders).c_str()); };
+	mCurl->addHttpRequest(Post);
 
 	std::printf("Loading PUT request...\n");
 
-	Curl::HTTPRequest Put;
-	Put.mUrl = "http://www.httpbin.org/put";
-	Put.mMethod = Curl::HTTP_PUT;
-	Put.mParameterString = "";
-	Put.mCallback = [=](Curl::HTTPResponse* response, Curl::HTTPClient* curl) { std::printf("Request complete with code %d; headers are %s\n", response->mResponseCode, curl->JsonToString(response->mHeaders).c_str()); };
-	mCurl->addHTTPRequest(Put);
+	HttpRequest Put;
+	Put.mUrl = "http://www.Httpbin.org/put";
+	Put.mMethod = HTTP_PUT;
+	Put.mCallback = [=](HttpResponse* response, HttpClient* curl) { std::printf("Request complete with code %d; headers are %s\n", response->mResponseCode, curl->jsonToString(response->mHeaders).c_str()); };
+	mCurl->addHttpRequest(Put);
 
 	std::printf("Loading DELETE request...\n");
 
-	Curl::HTTPRequest Delete;
-	Delete.mUrl = "http://www.httpbin.org/delete";
-	Delete.mMethod = Curl::HTTP_DELETE;
-	Delete.mParameterString = "";
-	Delete.mCallback = [=](Curl::HTTPResponse* response, Curl::HTTPClient* curl) { std::printf("Request complete with code %d; headers are %s\n", response->mResponseCode, curl->JsonToString(response->mHeaders).c_str()); };
-	mCurl->addHTTPRequest(Delete);
+	HttpRequest Delete;
+	Delete.mUrl = "http://www.Httpbin.org/delete";
+	Delete.mMethod = HTTP_DELETE;
+	Delete.mCallback = [=](HttpResponse* response, HttpClient* curl) { std::printf("Request complete with code %d; headers are %s\n", response->mResponseCode, curl->jsonToString(response->mHeaders).c_str()); };
+	mCurl->addHttpRequest(Delete);
 
 	std::printf("Loading HEAD request...\n");
 
-	Curl::HTTPRequest Head;
-	Head.mUrl = "http://www.httpbin.org/headers";
-	Head.mMethod = Curl::HTTP_HEAD;
-	Head.mParameterString = "";
-	Head.mCallback = [=](Curl::HTTPResponse* response, Curl::HTTPClient* curl) { std::printf("Request complete with code %d; headers are %s\n", response->mResponseCode, curl->JsonToString(response->mHeaders).c_str()); }; mCurl->addHTTPRequest(Head);
-
+	HttpRequest Head;
+	Head.mUrl = "http://www.Httpbin.org/headers";
+	Head.mMethod = HTTP_HEADERS;
+	Head.mCallback = [=](HttpResponse* response, HttpClient* curl) { std::printf("Request complete with code %d; headers are %s\n", response->mResponseCode, curl->jsonToString(response->mHeaders).c_str()); }; mCurl->addHttpRequest(Head);
+	*/
 }
 
 void cinder_multiRequestApp::mouseDown(MouseEvent event)

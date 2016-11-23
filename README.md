@@ -1,4 +1,4 @@
-# ofxCurl
+# midnight-HTTP
 
 A wrapper to simplify using the libcurl for making REST API calls over a network.
 
@@ -26,7 +26,7 @@ This project is currently not configured for Xcode in OSX.  If anyone wants to t
 For all use cases, you'll want to create an instance of ofxCurl by calling
 
 ```
-std::shared_ptr<ofxCurl::Curl> curl_instance = ofxCurl::Curl::make();
+std::shared_ptr<Curl::HTTPClient> curl_instance = Curl::HTTPClient::make();
 ```
 
 This creates an instance of cURL that will manage all network calls.
@@ -51,11 +51,11 @@ This will cause your program to wait for the call to be completed before storing
 Alternatively, you an utilize cURL's multithreaded multi-curl functionality by calling `addRequest`.  To do this, you'll need to add a callback function to your request of the type `std::function<void(HTTPResponse*)>`:
 
 ```
-ofxCurl::HTTPRequest Get;
+Curl::HTTPRequest Get;
 Get.mUrl = "http://www.httpbin.org/get";
-Get.mMethod = ofxCurl::HTTP_GET;
+Get.mMethod = Curl::HTTP_GET;
 Get.mParameterString = mCurl->mapToString(requestParameters);
-Get.mCallback = [=](ofxCurl::HTTPResponse* response) { std::printf("Request complete with response code %d; response was %s.\n", response->mResponseCode, response->mBody.c_str()); };
+Get.mCallback = [=](Curl::HTTPResponse* response, Curl::HTTPClient* client) { std::printf("Request complete with response code %d; response was %s.\n", response->mResponseCode, response->mBody.c_str()); };
 mCurl->addHTTPRequest(Get);
 ```
 
