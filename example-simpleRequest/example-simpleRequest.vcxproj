@@ -174,14 +174,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\libs\jsoncpp\src\jsoncpp.cpp" />
-    <ClCompile Include="..\src\HTTPClient.cpp" />
+    <ClCompile Include="..\src\HttpClient.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\ofApp.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\libs\jsoncpp\include\jsoncpp\json-forwards.h" />
     <ClInclude Include="..\libs\jsoncpp\include\jsoncpp\json.h" />
-    <ClInclude Include="..\src\HTTPClient.h" />
+    <ClInclude Include="..\src\HttpClient.h" />
     <ClInclude Include="src\ofApp.h" />
     <ClInclude Include="..\..\..\addons\ofxCurl\libs\libcurl\include\curl\curl.h" />
     <ClInclude Include="..\..\..\addons\ofxCurl\libs\libcurl\include\curl\curlbuild.h" />

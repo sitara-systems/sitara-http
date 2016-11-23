@@ -7,11 +7,11 @@
     <ClCompile Include="src\main.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\HTTPClient.cpp">
-      <Filter>addons\ofxCurl\src</Filter>
-    </ClCompile>
     <ClCompile Include="..\libs\jsoncpp\src\jsoncpp.cpp">
       <Filter>addons\ofxCurl\libs\jsoncpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\HttpClient.cpp">
+      <Filter>addons\ofxCurl\src</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -74,14 +74,14 @@
     <ClInclude Include="..\..\..\addons\ofxCurl\libs\libcurl\include\curl\typecheck-gcc.h">
       <Filter>addons\ofxCurl\libs\libcurl\include\curl</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\HTTPClient.h">
-      <Filter>addons\ofxCurl\src</Filter>
-    </ClInclude>
     <ClInclude Include="..\libs\jsoncpp\include\jsoncpp\json.h">
       <Filter>addons\ofxCurl\libs\jsoncpp</Filter>
     </ClInclude>
     <ClInclude Include="..\libs\jsoncpp\include\jsoncpp\json-forwards.h">
       <Filter>addons\ofxCurl\libs\jsoncpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\HttpClient.h">
+      <Filter>addons\ofxCurl\src</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

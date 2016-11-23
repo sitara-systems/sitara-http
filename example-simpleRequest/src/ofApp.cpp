@@ -1,21 +1,30 @@
 #include "ofApp.h"
 
 //--------------------------------------------------------------
-void ofApp::setup(){
-	mHTTPClient = Curl::HTTPClient::make();
+using namespace midnight::http;
 
-	std::map<std::string, std::string> requestParameters;
-	requestParameters["foo"] = "bar baz";
+void ofApp::setup(){
+	mHttpClient = HttpClient::make();
+
+	std::printf("Loading GET request...\n");
+
+	HttpRequest Get;
+	Get.mUrl = "http://www.httpbin.org/get";
+	Get.mMethod = HTTP_GET;
+	Get.mCallback = [=](HttpResponse* response, HttpClient* client) { std::printf("GET request complete with code %d\n", response->mResponseCode); };
+
+	HttpResponse get_response = mHttpClient->makeRequest(Get);
 
 	std::printf("Loading POST request...\n");
 
-	Curl::HTTPRequest Post;
+	HttpRequest Post;
 	Post.mUrl = "http://www.httpbin.org/post";
-	Post.mMethod = Curl::HTTP_POST;
-	Post.mParameterString = mHTTPClient->mapToString(requestParameters);
+	Post.mMethod = HTTP_POST;
+	Post.mCallback = [=](HttpResponse* response, HttpClient* client) { std::printf("POST request complete with code %d\n", response->mResponseCode); };
 
-	Curl::HTTPResponse response = mHTTPClient->makeRequest(Post);
-	std::printf("Response headers are %s\n", mHTTPClient->JsonToString(response.mHeaders).c_str());
+	HttpResponse post_response = mHttpClient->makeRequest(Post);
+
+	std::printf("All requests complete.\n");
 }
 
 //--------------------------------------------------------------

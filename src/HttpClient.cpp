@@ -239,7 +239,7 @@ void HttpClient::updateThreads() {
 				curl_easy_cleanup(curlInstance);
 			}
 			else {
-				std::printf("midnight-Http::HttpClient ERROR: After curl_multi_info_read(), CURLMsg=%d\n", message->msg);
+				std::printf("midnight-http::HttpClient ERROR: After curl_multi_info_read(), CURLMsg=%d\n", message->msg);
 			}
 		}
 
@@ -266,7 +266,7 @@ void HttpClient::loadRequest() {
 
 void HttpClient::setOptions(CURL* curl, const HttpRequest &request) {
 	if (!mMultiCurl) {
-		std::printf("midnight-Http::HttpClient ERROR: MultiCurl hasn't been instantiated!");
+		std::printf("midnight-http::HttpClient ERROR: MultiCurl hasn't been instantiated!");
 	}
 
 	CURLcode curlCode;
@@ -305,7 +305,7 @@ void HttpClient::setOptions(CURL* curl, const HttpRequest &request) {
 
 		mFile = std::fopen(request.mFilename.c_str(), "w");
 		if (mFile == NULL) {
-			std::printf("midnight-Http::HttpClient ERROR: Cannot open file %s\n", request.mFilename.c_str());
+			std::printf("midnight-http::HttpClient ERROR: Cannot open file %s\n", request.mFilename.c_str());
 		}
 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, mFile);
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &writeToFile);
@@ -368,7 +368,7 @@ void HttpClient::setOptions(CURL* curl, const HttpRequest &request) {
 		checkForErrors(curlCode);
 		break;
 	default:
-		std::printf("midnight-Http::HttpClient Http Method not implemented.\n");
+		std::printf("midnight-http::HttpClient Http Method not implemented.\n");
 		break;
 	}
 }
@@ -376,14 +376,14 @@ void HttpClient::setOptions(CURL* curl, const HttpRequest &request) {
 void HttpClient::checkForErrors(const CURLcode error_code) {
 	std::string errorString = curl_easy_strerror(error_code);
 	if (error_code != CURLE_OK) {
-		std::printf("midnight-Http::HttpClient ERROR: cURL failed: %s\n", errorString.c_str());
+		std::printf("midnight-http::HttpClient ERROR: cURL failed: %s\n", errorString.c_str());
 	}
 }
 
 void HttpClient::checkForMultiErrors(const CURLMcode error_code) {
 	std::string errorString = curl_multi_strerror(error_code);
 	if (error_code != CURLM_OK) {
-		std::printf("midnight-Http::HttpClient ERROR: multi-cURL failed: %s\n", errorString.c_str());
+		std::printf("midnight-http::HttpClient ERROR: multi-cURL failed: %s\n", errorString.c_str());
 	}
 }
 
