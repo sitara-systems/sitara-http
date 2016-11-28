@@ -82,6 +82,7 @@ void HttpClient::addHttpRequest(const HttpRequest &request) {
 	Adds a non-blocking request to the request queue.  Requests will be made when a spot in the queue is available, and then the callback attached to the request object will be called.
 	*/
 	mUpdateMutex.lock();
+	std::printf("Adding item to queue\n");
 	mRequestQueue.push(request);
 	mUpdateMutex.unlock();
 }
@@ -158,7 +159,7 @@ Json::Value HttpClient::stringToJson(const std::string &string) {
 	Json::Value output;
 	bool parsingSuccessful = mJsonReader.parse(string, output);
 	if (!parsingSuccessful) {
-		std::printf("midnight-http::HttpClient ERROR: Failed to parse JSON %s\n", mJsonReader.getFormattedErrorMessages().c_str());
+		std::printf("HttpClient ERROR: Failed to parse JSON %s\n", mJsonReader.getFormattedErrorMessages().c_str());
 		return NULL;
 	}
 	else {
@@ -166,6 +167,136 @@ Json::Value HttpClient::stringToJson(const std::string &string) {
 	}
 }
 
+void HttpClient::checkHttpStatus(int responseCode) {
+	switch (responseCode) {
+	case 100:
+		std::printf("HTTP/1.1 100 Continue\n");
+		break;
+	case 101:
+		std::printf("HTTP/1.1 101 Switching Protocols\n");
+		break;
+	case 200:
+		std::printf("HTTP/1.1 200 OK\n");
+		break;
+	case 201:
+		std::printf("HTTP/1.1 201 Created\n");
+		break;
+	case 202:
+		std::printf("HTTP/1.1 202 Accepted\n");
+		break;
+	case 203:
+		std::printf("HTTP/1.1 203 Non-Authoritative Information\n");
+		break;
+	case 204:
+		std::printf("HTTP/1.1 204 No Content\n");
+		break;
+	case 205:
+		std::printf("HTTP/1.1 205 Reset Content\n");
+		break;
+	case 206:
+		std::printf("HTTP/1.1 206 Partial Content\n");
+		break;
+	case 300:
+		std::printf("HTTP/1.1 300 Multiple Choices\n");
+		break;
+	case 301:
+		std::printf("HTTP/1.1 301 Moved Permanently\n");
+		break;
+	case 302:
+		std::printf("HTTP/1.1 302 Found\n");
+		break;
+	case 303:
+		std::printf("HTTP/1.1 303 See Other\n");
+		break;
+	case 304:
+		std::printf("HTTP/1.1 304 Not Modified\n");
+		break;
+	case 305:
+		std::printf("HTTP/1.1 305 Use Proxy\n");
+		break;
+	case 307:
+		std::printf("HTTP/1.1 307 Temporary Redirect\n");
+		break;
+	case 400:
+		std::printf("HTTP/1.1 400 Bad Request\n");
+		break;
+	case 401:
+		std::printf("HTTP/1.1 401 Unauthorized\n");
+		break;
+	case 402:
+		std::printf("HTTP/1.1 402 Payment Required\n");
+		break;
+	case 403:
+		std::printf("HTTP/1.1 403 Forbidden\n");
+		break;
+	case 404:
+		std::printf("HTTP/1.1 404 Not Found\n");
+		break;
+	case 405:
+		std::printf("HTTP/1.1 405 Method Not Allowed\n");
+		break;
+	case 406:
+		std::printf("HTTP/1.1 406 Not Acceptable\n");
+		break;
+	case 407:
+		std::printf("HTTP/1.1 407 Proxy Authenication Required\n");
+		break;
+	case 408:
+		std::printf("HTTP/1.1 408 Request Timeout\n");
+		break;
+	case 409:
+		std::printf("HTTP/1.1 409 Conflict\n");
+		break;
+	case 410:
+		std::printf("HTTP/1.1 410 Gone\n");
+		break;
+	case 411:
+		std::printf("HTTP/1.1 411 Length Required\n");
+		break;
+	case 412:
+		std::printf("HTTP/1.1 412 Precondition Failed\n");
+		break;
+	case 413:
+		std::printf("HTTP/1.1 413 Payload Too Large");
+		break;
+	case 414:
+		std::printf("HTTP/1.1 414 URI Too Long\n");
+		break;
+	case 415:
+		std::printf("HTTP/1.1 415 Unsupported Media Type\n");
+		break;
+	case 416:
+		std::printf("HTTP/1.1 416 Rrange Not Satisfiable\n");
+		break;
+	case 417:
+		std::printf("HTTP/1.1 417 Expectation Failed\n");
+		break;
+	case 418:
+		std::printf("HTTP/1.1 418 I'm a teapot\n");
+		break;
+	case 426:
+		std::printf("HTTP/1.1 426 Upgrade Required\n");
+		break;
+	case 500:
+		std::printf("HTTP/1.1 500 Internal Server Error\n");
+		break;
+	case 501:
+		std::printf("HTTP/1.1 501 Not Implemented\n");
+		break;
+	case 502:
+		std::printf("HTTP/1.1 502 Bad Gateway\n");
+		break;
+	case 503:
+		std::printf("HTTP/1.1 503 Service Unavailable\n");
+		break;
+	case 504:
+		std::printf("HTTP/1.1 504 Gate Timeout\n");
+		break;
+	case 505:
+		std::printf("HTTP/1.1 505 HTTP Version Not Supported\n");
+		break;
+	}
+}
 
 void HttpClient::updateThreads() {
 	while (true) {

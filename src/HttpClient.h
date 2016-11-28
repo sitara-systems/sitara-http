@@ -68,6 +68,7 @@ namespace midnight {
 			std::string methodToString(const HttpMethod &method);
 			std::string jsonToString(const Json::Value &value);
 			Json::Value stringToJson(const std::string &string);
+			void checkHttpStatus(int responseCode);
 		protected:
 			HttpClient();
 			void updateThreads();
