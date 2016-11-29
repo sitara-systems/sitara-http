@@ -72,6 +72,7 @@ namespace midnight {
 		protected:
 			HttpClient();
 			void updateThreads();
+			void destroyThreads();
 			void loadRequest();
 			void setOptions(CURL* curl, const HttpRequest &request);
 			void checkForErrors(const CURLcode error_code);
@@ -89,6 +90,7 @@ namespace midnight {
 			int mMaxNumberOfThreads;
 			int mCurrentNumberOfThreads;
 			std::FILE* mFile;
+			bool mRunUpdateThread;
 			std::thread mUpdateThread;
 			std::mutex mUpdateMutex;
 			std::string mUserAgent;

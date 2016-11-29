@@ -16,13 +16,15 @@ HttpClient::HttpClient() {
 	multiCode = curl_multi_setopt(mMultiCurl, CURLMOPT_MAXCONNECTS, mMaxNumberOfThreads);
 	checkForMultiErrors(multiCode);
 	mUserAgent = "Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)";
+	mRunUpdateThread = true;
 	mUpdateThread = std::thread(&HttpClient::updateThreads, this);
 	mFile = NULL;
 }
 
 HttpClient::~HttpClient() {
+	destroyThreads();
 	curl_multi_cleanup(mMultiCurl);
-	curl_global_cleanup();
+	curl_global_cleanup(); // not sure if we need this -- it seems to kill all other instances of curl.
 }
 
 HttpResponse HttpClient::makeRequest(const HttpRequest &request) {
@@ -36,7 +38,7 @@ HttpResponse HttpClient::makeRequest(const HttpRequest &request) {
 	checkForErrors(curlCode);
 
 	HttpResponse response;
-	
+
 	// corresponding request
 	response.mRequest = request;
 
@@ -311,7 +313,7 @@ void HttpClient::updateThreads() {
 			int numfds = 0;
 			multiCode = curl_multi_wait(mMultiCurl, NULL, 0, MAX_WAIT_MSECS, &numfds);
 			checkForMultiErrors(multiCode);
-		
+
 			multiCode = curl_multi_perform(mMultiCurl, &mCurrentNumberOfThreads);
 			checkForMultiErrors(multiCode);
 
@@ -322,7 +324,7 @@ void HttpClient::updateThreads() {
 
 		while ((message = curl_multi_info_read(mMultiCurl, &messagesRemaining))) {
 			if (message->msg == CURLMSG_DONE) {
-				
+
 				CURL* curlInstance;
 				curlInstance = message->easy_handle;
 
@@ -331,7 +333,7 @@ void HttpClient::updateThreads() {
 				checkForErrors(curlCode);
 
 				HttpResponse response;
-				
+
 				// corresponding request
 				response.mRequest = mHandleMap[curlInstance];
 
@@ -377,9 +379,16 @@ void HttpClient::updateThreads() {
 	}
 }
 
+void HttpClient::destroyThreads() {
+	mRunUpdateThread = false;
+	if (mUpdateThread.joinable()) {
+		mUpdateThread.join();
+	}
+}
+
 void HttpClient::loadRequest() {
 	HttpRequest request = mRequestQueue.front();
-	
+
 	//makeStringSafe(request.mRequestBody);
 
 	CURL* c = curl_easy_init();
@@ -556,7 +565,7 @@ void HttpClient::splitString(const std::string &string, char delimiter, std::vec
 	std::string item;
 	while (std::getline(ss, item, delimiter)) {
 		output.push_back(item);
-		}
+	}
 }
 
 std::vector<std::string> HttpClient::splitString(const std::string &string, char delimiter) {
