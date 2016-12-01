@@ -17,6 +17,8 @@ HttpClient::HttpClient() {
 	checkForMultiErrors(multiCode);
 	mUserAgent = "Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)";
 	mRunUpdateThread = true;
+	//@Nathan TODO:
+	//I commented this code out because the IW application was haning on the execution of the thread.  Not sure why.  
 	//mUpdateThread = std::thread(&HttpClient::updateThreads, this);
 	mFile = NULL;
 }
