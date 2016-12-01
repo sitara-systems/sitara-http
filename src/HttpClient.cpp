@@ -17,7 +17,7 @@ HttpClient::HttpClient() {
 	checkForMultiErrors(multiCode);
 	mUserAgent = "Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)";
 	mRunUpdateThread = true;
-	mUpdateThread = std::thread(&HttpClient::updateThreads, this);
+	//mUpdateThread = std::thread(&HttpClient::updateThreads, this);
 	mFile = NULL;
 }
 
@@ -69,7 +69,10 @@ HttpResponse HttpClient::makeRequest(const HttpRequest &request) {
 	}
 
 	// callback attached to request
-	request.mCallback(&response, this);
+	if(request.mCallback)
+		request.mCallback(&response, this);
+	else
+		std::printf("midnight-http::HttpClient: WARNING: no callback provided, continuing");
 
 	cleanupRequest(c);
 
@@ -364,7 +367,10 @@ void HttpClient::updateThreads() {
 				}
 
 				// callback attached to request
-				mHandleMap[curlInstance].mCallback(&response, this);
+				if (mHandleMap[curlInstance].mCallback)
+					mHandleMap[curlInstance].mCallback(&response, this);
+				else
+					std::printf("midnight-http::HttpClient ERROR: no callback provided");
 
 				cleanupRequest(curlInstance);
 
