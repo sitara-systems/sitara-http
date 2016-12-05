@@ -17,16 +17,13 @@ HttpClient::HttpClient() {
 	checkForMultiErrors(multiCode);
 	mUserAgent = "Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)";
 	mRunUpdateThread = true;
-	//@Nathan TODO:
-	//I commented this code out because the IW application was haning on the execution of the thread.  Not sure why.  
-	//mUpdateThread = std::thread(&HttpClient::updateThreads, this);
+	mUpdateThread = std::thread(&HttpClient::updateThreads, this);
 	mFile = NULL;
 }
 
 HttpClient::~HttpClient() {
 	destroyThreads();
 	curl_multi_cleanup(mMultiCurl);
-	curl_global_cleanup(); // not sure if we need this -- it seems to kill all other instances of curl.
 }
 
 HttpResponse HttpClient::makeRequest(const HttpRequest &request) {
@@ -71,10 +68,12 @@ HttpResponse HttpClient::makeRequest(const HttpRequest &request) {
 	}
 
 	// callback attached to request
-	if(request.mCallback)
+	if(request.mCallback) {
 		request.mCallback(&response, this);
-	else
-		std::printf("midnight-http::HttpClient: WARNING: no callback provided, continuing");
+	}
+	else {
+		std::printf("midnight-http::HttpClient WARNING: no callback provided, continuing");
+	}
 
 	cleanupRequest(c);
 
@@ -166,7 +165,7 @@ Json::Value HttpClient::stringToJson(const std::string &string) {
 	Json::Value output;
 	bool parsingSuccessful = mJsonReader.parse(string, output);
 	if (!parsingSuccessful) {
-		std::printf("HttpClient ERROR: Failed to parse JSON %s\n", mJsonReader.getFormattedErrorMessages().c_str());
+		std::printf("midnight::http::HttpClient ERROR: Failed to parse JSON %s\n", mJsonReader.getFormattedErrorMessages().c_str());
 		return NULL;
 	}
 	else {
@@ -306,12 +305,12 @@ void HttpClient::checkHttpStatus(int responseCode) {
 }
 
 void HttpClient::updateThreads() {
-	while (true) {
+	while (mRunUpdateThread) {
 		CURLMcode multiCode;
 		mUpdateMutex.lock();
 		while (mCurrentNumberOfThreads < mMaxNumberOfThreads && mRequestQueue.size() > 0) {
 			loadRequest();
-			std::printf("Adding request; current requests are at %d / %d\n", mCurrentNumberOfThreads, mMaxNumberOfThreads);
+			std::printf("midnight-http::HttpClient Adding request; current requests are at %d / %d\n", mCurrentNumberOfThreads, mMaxNumberOfThreads);
 		}
 		mUpdateMutex.unlock();
 		do {
