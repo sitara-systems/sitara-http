@@ -356,6 +356,19 @@ void HttpClient::updateThreads() {
 					}
 				}
 
+				if (!(((response.mResponseCode / 100) % 10) == 2)) {
+					// HTTP 1.1/2xx is a successful response code; if the code is not 2xx, then the call was not successful.
+					response.mBody = NULL;
+
+					cleanupRequest(curlInstance);
+					curl_multi_remove_handle(mMultiCurl, curlInstance);
+					curl_easy_cleanup(curlInstance);
+
+					std::printf("HttpClient ERROR -- response not successful (code %d), not returning valid JSON.\n", response.mResponseCode);
+
+					break;
+				}
+
 				// response body
 				Json::Value body = stringToJson(mResponseBodyMap[curlInstance]);
 				if (body != NULL) {
@@ -370,8 +383,9 @@ void HttpClient::updateThreads() {
 				// callback attached to request
 				if (mHandleMap[curlInstance].mCallback)
 					mHandleMap[curlInstance].mCallback(&response, this);
-				else
+				else {
 					std::printf("midnight-http::HttpClient ERROR: no callback provided");
+				}
 
 				cleanupRequest(curlInstance);
 
