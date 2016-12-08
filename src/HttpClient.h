@@ -57,7 +57,7 @@ namespace midnight {
 			static std::shared_ptr<HttpClient> make();
 			~HttpClient();
 			HttpResponse makeRequest(const HttpRequest &request);
-			void addHttpRequest(const HttpRequest &request);
+			void addRequest(const HttpRequest &request);
 			size_t getNumberOfRequests();
 			void setMaxNumberOfThreads(int numThreads);
 			int getMaxNumberOfThreads();

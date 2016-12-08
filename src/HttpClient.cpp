@@ -83,7 +83,7 @@ HttpResponse HttpClient::makeRequest(const HttpRequest &request) {
 }
 
 
-void HttpClient::addHttpRequest(const HttpRequest &request) {
+void HttpClient::addRequest(const HttpRequest &request) {
 	/*
 	Adds a non-blocking request to the request queue.  Requests will be made when a spot in the queue is available, and then the callback attached to the request object will be called.
 	*/
