@@ -7,11 +7,11 @@
   <PropertyGroup />
   <ItemDefinitionGroup>
     <ClCompile>
-      <AdditionalIncludeDirectories>$(OF_ROOT)\addons\ofxCurl\src;$(CURL_ROOT)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\MidnightCommercial\Cinder\blocks\midnight-HTTP\src;C:\MidnightCommercial\Cinder\blocks\midnight-HTTP\libs\libcurl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>..\..\..\addons\ofxCurl\libs\libcurl\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\MidnightCommercial\Cinder\blocks\midnight-HTTP\libs\libcurl\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>libcurl.lib;libcurl_a.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ProjectReference>
