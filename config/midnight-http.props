@@ -7,7 +7,7 @@
   <PropertyGroup />
   <ItemDefinitionGroup>
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\MidnightCommercial\Cinder\blocks\midnight-http\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\MidnightCommercial\Cinder\blocks\midnight-http\libs\libcurl\include;C:\MidnightCommercial\Cinder\blocks\midnight-http\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
