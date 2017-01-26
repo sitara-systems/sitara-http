@@ -173,133 +173,133 @@ Json::Value HttpClient::stringToJson(const std::string &string) {
 	}
 }
 
-void HttpClient::checkHttpStatus(int responseCode) {
+std::string HttpClient::checkHttpStatus(int responseCode) {
 	switch (responseCode) {
 	case 100:
-		std::printf("HTTP/1.1 100 Continue\n");
+		return "HTTP/1.1 100 Continue";
 		break;
 	case 101:
-		std::printf("HTTP/1.1 101 Switching Protocols\n");
+		return "HTTP/1.1 101 Switching Protocols";
 		break;
 	case 200:
-		std::printf("HTTP/1.1 200 OK\n");
+		return "HTTP/1.1 200 OK";
 		break;
 	case 201:
-		std::printf("HTTP/1.1 201 Created\n");
+		return "HTTP/1.1 201 Created";
 		break;
 	case 202:
-		std::printf("HTTP/1.1 202 Accepted\n");
+		return "HTTP/1.1 202 Accepted";
 		break;
 	case 203:
-		std::printf("HTTP/1.1 203 Non-Authoritative Information\n");
+		return "HTTP/1.1 203 Non-Authoritative Information";
 		break;
 	case 204:
-		std::printf("HTTP/1.1 204 No Content\n");
+		return "HTTP/1.1 204 No Content";
 		break;
 	case 205:
-		std::printf("HTTP/1.1 205 Reset Content\n");
+		return "HTTP/1.1 205 Reset Content";
 		break;
 	case 206:
-		std::printf("HTTP/1.1 206 Partial Content\n");
+		return "HTTP/1.1 206 Partial Content";
 		break;
 	case 300:
-		std::printf("HTTP/1.1 300 Multiple Choices\n");
+		return "HTTP/1.1 300 Multiple Choices";
 		break;
 	case 301:
-		std::printf("HTTP/1.1 301 Moved Permanently\n");
+		return "HTTP/1.1 301 Moved Permanently";
 		break;
 	case 302:
-		std::printf("HTTP/1.1 302 Found\n");
+		return "HTTP/1.1 302 Found";
 		break;
 	case 303:
-		std::printf("HTTP/1.1 303 See Other\n");
+		return "HTTP/1.1 303 See Other";
 		break;
 	case 304:
-		std::printf("HTTP/1.1 304 Not Modified\n");
+		return "HTTP/1.1 304 Not Modified";
 		break;
 	case 305:
-		std::printf("HTTP/1.1 305 Use Proxy\n");
+		return "HTTP/1.1 305 Use Proxy";
 		break;
 	case 307:
-		std::printf("HTTP/1.1 307 Temporary Redirect\n");
+		return "HTTP/1.1 307 Temporary Redirect";
 		break;
 	case 400:
-		std::printf("HTTP/1.1 400 Bad Request\n");
+		return "HTTP/1.1 400 Bad Request";
 		break;
 	case 401:
-		std::printf("HTTP/1.1 401 Unauthorized\n");
+		return "HTTP/1.1 401 Unauthorized";
 		break;
 	case 402:
-		std::printf("HTTP/1.1 402 Payment Required\n");
+		return "HTTP/1.1 402 Payment Required";
 		break;
 	case 403:
-		std::printf("HTTP/1.1 403 Forbidden\n");
+		return "HTTP/1.1 403 Forbidden";
 		break;
 	case 404:
-		std::printf("HTTP/1.1 404 Not Found\n");
+		return "HTTP/1.1 404 Not Found";
 		break;
 	case 405:
-		std::printf("HTTP/1.1 405 Method Not Allowed\n");
+		return "HTTP/1.1 405 Method Not Allowed";
 		break;
 	case 406:
-		std::printf("HTTP/1.1 406 Not Acceptable\n");
+		return "HTTP/1.1 406 Not Acceptable";
 		break;
 	case 407:
-		std::printf("HTTP/1.1 407 Proxy Authenication Required\n");
+		return "HTTP/1.1 407 Proxy Authenication Required";
 		break;
 	case 408:
-		std::printf("HTTP/1.1 408 Request Timeout\n");
+		return "HTTP/1.1 408 Request Timeout";
 		break;
 	case 409:
-		std::printf("HTTP/1.1 409 Conflict\n");
+		return "HTTP/1.1 409 Conflict";
 		break;
 	case 410:
-		std::printf("HTTP/1.1 410 Gone\n");
+		return "HTTP/1.1 410 Gone";
 		break;
 	case 411:
-		std::printf("HTTP/1.1 411 Length Required\n");
+		return "HTTP/1.1 411 Length Required";
 		break;
 	case 412:
-		std::printf("HTTP/1.1 412 Precondition Failed\n");
+		return "HTTP/1.1 412 Precondition Failed";
 		break;
 	case 413:
-		std::printf("HTTP/1.1 413 Payload Too Large");
+		return "HTTP/1.1 413 Payload Too Large";
 		break;
 	case 414:
-		std::printf("HTTP/1.1 414 URI Too Long\n");
+		return "HTTP/1.1 414 URI Too Long";
 		break;
 	case 415:
-		std::printf("HTTP/1.1 415 Unsupported Media Type\n");
+		return "HTTP/1.1 415 Unsupported Media Type";
 		break;
 	case 416:
-		std::printf("HTTP/1.1 416 Rrange Not Satisfiable\n");
+		return "HTTP/1.1 416 Rrange Not Satisfiable";
 		break;
 	case 417:
-		std::printf("HTTP/1.1 417 Expectation Failed\n");
+		return "HTTP/1.1 417 Expectation Failed";
 		break;
 	case 418:
-		std::printf("HTTP/1.1 418 I'm a teapot\n");
+		return "HTTP/1.1 418 I'm a teapot";
 		break;
 	case 426:
-		std::printf("HTTP/1.1 426 Upgrade Required\n");
+		return "HTTP/1.1 426 Upgrade Required";
 		break;
 	case 500:
-		std::printf("HTTP/1.1 500 Internal Server Error\n");
+		return "HTTP/1.1 500 Internal Server Error";
 		break;
 	case 501:
-		std::printf("HTTP/1.1 501 Not Implemented\n");
+		return "HTTP/1.1 501 Not Implemented";
 		break;
 	case 502:
-		std::printf("HTTP/1.1 502 Bad Gateway\n");
+		return "HTTP/1.1 502 Bad Gateway";
 		break;
 	case 503:
-		std::printf("HTTP/1.1 503 Service Unavailable\n");
+		return "HTTP/1.1 503 Service Unavailable";
 		break;
 	case 504:
-		std::printf("HTTP/1.1 504 Gate Timeout\n");
+		return "HTTP/1.1 504 Gate Timeout";
 		break;
 	case 505:
-		std::printf("HTTP/1.1 505 HTTP Version Not Supported\n");
+		return "HTTP/1.1 505 HTTP Version Not Supported";
 		break;
 	}
 }
@@ -365,6 +365,7 @@ void HttpClient::updateThreads() {
 					curl_easy_cleanup(curlInstance);
 
 					std::printf("HttpClient ERROR -- response not successful (code %d), not returning valid JSON.\n", response.mResponseCode);
+					std::printf("HttpClient ERROR -- %s", checkHttpStatus(response.mResponseCode).c_str());
 
 					break;
 				}
