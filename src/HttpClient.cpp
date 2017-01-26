@@ -72,7 +72,7 @@ HttpResponse HttpClient::makeRequest(const HttpRequest &request) {
 		request.mCallback(&response, this);
 	}
 	else {
-		std::printf("midnight-http::HttpClient WARNING: no callback provided, continuing");
+		//std::printf("midnight-http::HttpClient WARNING: no callback provided, continuing\n");
 	}
 
 	cleanupRequest(c);
@@ -88,7 +88,6 @@ void HttpClient::addRequest(const HttpRequest &request) {
 	Adds a non-blocking request to the request queue.  Requests will be made when a spot in the queue is available, and then the callback attached to the request object will be called.
 	*/
 	mUpdateMutex.lock();
-	std::printf("Adding item to queue\n");
 	mRequestQueue.push(request);
 	mUpdateMutex.unlock();
 }
@@ -310,7 +309,7 @@ void HttpClient::updateThreads() {
 		mUpdateMutex.lock();
 		while (mCurrentNumberOfThreads < mMaxNumberOfThreads && mRequestQueue.size() > 0) {
 			loadRequest();
-			std::printf("midnight-http::HttpClient Adding request; current requests are at %d / %d\n", mCurrentNumberOfThreads, mMaxNumberOfThreads);
+			//std::printf("midnight-http::HttpClient Adding request; current requests are at %d / %d\n", mCurrentNumberOfThreads, mMaxNumberOfThreads);
 		}
 		mUpdateMutex.unlock();
 		do {
@@ -382,10 +381,8 @@ void HttpClient::updateThreads() {
 				}
 
 				// callback attached to request
-				if (mHandleMap[curlInstance].mCallback)
+				if (mHandleMap[curlInstance].mCallback) {
 					mHandleMap[curlInstance].mCallback(&response, this);
-				else {
-					std::printf("midnight-http::HttpClient ERROR: no callback provided");
 				}
 
 				cleanupRequest(curlInstance);
