@@ -65,9 +65,9 @@ namespace midnight {
 			std::string getUserAgent();
 			std::string mapToString(const std::map<std::string, std::string> &map);
 			void makeStringSafe(std::string &input);
-			static std::string methodToString(const HttpMethod &method);
-			static std::string jsonToString(const Json::Value &value);
-			static Json::Value stringToJson(const std::string &string);
+			std::string methodToString(const HttpMethod &method);
+			std::string jsonToString(const Json::Value &value);
+			Json::Value stringToJson(const std::string &string);
 			std::string checkHttpStatus(int responseCode);
 		protected:
 			HttpClient();
