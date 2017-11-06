@@ -32,8 +32,8 @@ void cinder_multiRequestApp::setup() {
 	HttpRequest Get;
 	Get.mUrl = "http://www.httpbin.org/get";
 	Get.mMethod = HTTP_GET;
-s	Get.mCallback = [=](HttpResponse* response, HttpClient* curl) { std::printf("Request complete with code %d; headers are %s\n", response->mResponseCode, curl->jsonToString(response->mHeaders).c_str()); };
-	mCurl->addHttpRequest(Get);
+	Get.mCallback = [=](HttpResponse* response, HttpClient* curl) { std::printf("Request complete with code %d; headers are %s\n", response->mResponseCode, curl->jsonToString(response->mHeaders).c_str()); };
+	mCurl->addRequest(Get);
 
 	/*
 	std::printf("Loading POST request...\n");
