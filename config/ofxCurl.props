@@ -3,15 +3,24 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros">
     <CURL_ROOT>..\..\..\addons\ofxCurl\libs\libcurl</CURL_ROOT>
+    <JSON_ROOT>..\..\..\addons\ofxCurl\libs\jsoncpp</JSON_ROOT>
   </PropertyGroup>
   <PropertyGroup />
   <ItemDefinitionGroup>
     <ClCompile>
+<<<<<<< HEAD
       <AdditionalIncludeDirectories>C:\MidnightCommercial\Cinder\blocks\midnight-HTTP\src;C:\MidnightCommercial\Cinder\blocks\midnight-HTTP\libs\libcurl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>C:\MidnightCommercial\Cinder\blocks\midnight-HTTP\libs\libcurl\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+=======
+      <AdditionalIncludeDirectories>$(OF_ROOT)\addons\ofxCurl\src;$(CURL_ROOT)\include;$(JSON_ROOT)\include;$(JSON_ROOT)/src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>$(CURL_ROOT)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+>>>>>>> caa49b5156f04809e9c941ed27f9f855c7517de1
       <AdditionalDependencies>libcurl.lib;libcurl_a.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ProjectReference>
@@ -21,6 +30,10 @@
   <ItemGroup>
     <BuildMacro Include="CURL_ROOT">
       <Value>$(CURL_ROOT)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="JSON_ROOT">
+      <Value>$(JSON_ROOT)</Value>
       <EnvironmentVariable>true</EnvironmentVariable>
     </BuildMacro>
   </ItemGroup>

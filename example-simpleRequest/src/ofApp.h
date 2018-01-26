@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
-#include "HTTPClient.h"
+#include "HttpClient.h"
 
 class ofApp : public ofBaseApp{
 
@@ -22,5 +22,5 @@ class ofApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
 
-		std::shared_ptr<Curl::HTTPClient> mHTTPClient;
+		std::shared_ptr<midnight::http::HttpClient> mHttpClient;
 };
