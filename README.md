@@ -1,4 +1,4 @@
-# midnight-HTTP
+# sitara-http
 
 A wrapper to simplify using the libcurl for making REST API calls over a network.
 
