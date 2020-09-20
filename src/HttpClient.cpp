@@ -1,6 +1,6 @@
 #include "HttpClient.h"
 
-using namespace midnight::http;
+using namespace sitara::http;
 
 std::shared_ptr<HttpClient> HttpClient::make() {
 	std::shared_ptr<HttpClient> client(new HttpClient());
@@ -72,7 +72,7 @@ HttpResponse HttpClient::makeRequest(const HttpRequest &request) {
 		request.mCallback(&response, this);
 	}
 	else {
-		//std::printf("midnight-http::HttpClient WARNING: no callback provided, continuing\n");
+		//std::printf("sitara-http::HttpClient WARNING: no callback provided, continuing\n");
 	}
 
 	cleanupRequest(c);
@@ -164,7 +164,7 @@ Json::Value HttpClient::stringToJson(const std::string &string) {
 	Json::Value output;
 	bool parsingSuccessful = mJsonReader.parse(string, output);
 	if (!parsingSuccessful) {
-		std::printf("midnight::http::HttpClient ERROR: Failed to parse JSON %s\n", mJsonReader.getFormattedErrorMessages().c_str());
+		std::printf("sitara::http::HttpClient ERROR: Failed to parse JSON %s\n", mJsonReader.getFormattedErrorMessages().c_str());
 		return NULL;
 	}
 	else {
@@ -309,7 +309,7 @@ void HttpClient::updateThreads() {
 		mUpdateMutex.lock();
 		while (mCurrentNumberOfThreads < mMaxNumberOfThreads && mRequestQueue.size() > 0) {
 			loadRequest();
-			//std::printf("midnight-http::HttpClient Adding request; current requests are at %d / %d\n", mCurrentNumberOfThreads, mMaxNumberOfThreads);
+			//std::printf("sitara-http::HttpClient Adding request; current requests are at %d / %d\n", mCurrentNumberOfThreads, mMaxNumberOfThreads);
 		}
 		mUpdateMutex.unlock();
 		do {
@@ -391,7 +391,7 @@ void HttpClient::updateThreads() {
 				curl_easy_cleanup(curlInstance);
 			}
 			else {
-				std::printf("midnight-http::HttpClient ERROR: After curl_multi_info_read(), CURLMsg=%d\n", message->msg);
+				std::printf("sitara-http::HttpClient ERROR: After curl_multi_info_read(), CURLMsg=%d\n", message->msg);
 			}
 		}
 
@@ -425,7 +425,7 @@ void HttpClient::loadRequest() {
 
 void HttpClient::setOptions(CURL* curl, const HttpRequest &request) {
 	if (!mMultiCurl) {
-		std::printf("midnight-http::HttpClient ERROR: MultiCurl hasn't been instantiated!");
+		std::printf("sitara-http::HttpClient ERROR: MultiCurl hasn't been instantiated!");
 	}
 
 	CURLcode curlCode;
@@ -464,7 +464,7 @@ void HttpClient::setOptions(CURL* curl, const HttpRequest &request) {
 
 		mFile = std::fopen(request.mFilename.c_str(), "w");
 		if (mFile == NULL) {
-			std::printf("midnight-http::HttpClient ERROR: Cannot open file %s\n", request.mFilename.c_str());
+			std::printf("sitara-http::HttpClient ERROR: Cannot open file %s\n", request.mFilename.c_str());
 		}
 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, mFile);
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &writeToFile);
@@ -527,7 +527,7 @@ void HttpClient::setOptions(CURL* curl, const HttpRequest &request) {
 		checkForErrors(curlCode);
 		break;
 	default:
-		std::printf("midnight-http::HttpClient Http Method not implemented.\n");
+		std::printf("sitara-http::HttpClient Http Method not implemented.\n");
 		break;
 	}
 }
@@ -535,14 +535,14 @@ void HttpClient::setOptions(CURL* curl, const HttpRequest &request) {
 void HttpClient::checkForErrors(const CURLcode error_code) {
 	std::string errorString = curl_easy_strerror(error_code);
 	if (error_code != CURLE_OK) {
-		std::printf("midnight-http::HttpClient ERROR: cURL failed: %s\n", errorString.c_str());
+		std::printf("sitara-http::HttpClient ERROR: cURL failed: %s\n", errorString.c_str());
 	}
 }
 
 void HttpClient::checkForMultiErrors(const CURLMcode error_code) {
 	std::string errorString = curl_multi_strerror(error_code);
 	if (error_code != CURLM_OK) {
-		std::printf("midnight-http::HttpClient ERROR: multi-cURL failed: %s\n", errorString.c_str());
+		std::printf("sitara-http::HttpClient ERROR: multi-cURL failed: %s\n", errorString.c_str());
 	}
 }
 

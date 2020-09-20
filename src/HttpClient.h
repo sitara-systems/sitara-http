@@ -10,10 +10,11 @@
 #include <mutex>
 #include <memory>
 #include <iostream>
+#include <functional>
 #include "jsoncpp/json.h"
 #include "curl/curl.h"
 
-namespace midnight {
+namespace sitara {
 	namespace http {
 
 		enum HttpMethod {
