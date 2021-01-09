@@ -8,7 +8,7 @@ std::shared_ptr<HttpClient> HttpClient::make() {
 }
 
 HttpClient::HttpClient() {
-	mMaxNumberOfThreads = 15;
+	mMaxNumberOfThreads = 8;
 	mCurrentNumberOfThreads = 0;
 	curl_global_init(CURL_GLOBAL_ALL);
 	mMultiCurl = curl_multi_init();
@@ -138,17 +138,17 @@ void HttpClient::makeStringSafe(std::string &input) {
 
 std::string HttpClient::methodToString(const HttpMethod &method) {
 	switch (method) {
-	case HTTP_DELETE:
+	case HttpMethod::HTTP_DELETE:
 		return "DELETE";
-	case HTTP_PUT:
+	case HttpMethod::HTTP_PUT:
 		return "PUT";
-	case HTTP_POST:
+	case HttpMethod::HTTP_POST:
 		return "POST";
-	case HTTP_PATCH:
+	case HttpMethod::HTTP_PATCH:
 		return "PATCH";
-	case HTTP_GET:
+	case HttpMethod::HTTP_GET:
 		return "GET";
-	case HTTP_HEADERS:
+	case HttpMethod::HTTP_HEADERS:
 		return "HEADERS";
 	default:
 		return NULL;
@@ -462,7 +462,7 @@ void HttpClient::setOptions(CURL* curl, const HttpRequest &request) {
 		curlCode = curl_easy_setopt(curl, CURLOPT_HEADER, 1);
 		checkForErrors(curlCode);
 
-		mFile = std::fopen(request.mFilename.c_str(), "w");
+		fopen_s(&mFile, request.mFilename.c_str(), "w");
 		if (mFile == NULL) {
 			std::printf("sitara-http::HttpClient ERROR: Cannot open file %s\n", request.mFilename.c_str());
 		}
@@ -471,7 +471,7 @@ void HttpClient::setOptions(CURL* curl, const HttpRequest &request) {
 	}
 
 	switch (request.mMethod) {
-	case HTTP_POST:
+	case HttpMethod::HTTP_POST:
 		curlCode = curl_easy_setopt(curl, CURLOPT_POST, 1);
 		checkForErrors(curlCode);
 		curlCode = curl_easy_setopt(curl, CURLOPT_URL, request.mUrl.c_str());
@@ -482,7 +482,7 @@ void HttpClient::setOptions(CURL* curl, const HttpRequest &request) {
 		curlCode = curl_easy_setopt(curl, CURLOPT_COPYPOSTFIELDS, request.mRequestBody.c_str());
 		checkForErrors(curlCode);
 		break;
-	case HTTP_GET:
+	case HttpMethod::HTTP_GET:
 		curlCode = curl_easy_setopt(curl, CURLOPT_URL, request.mUrl.c_str());
 		checkForErrors(curlCode);
 		if (!request.mRequestBody.empty()) {
@@ -492,7 +492,7 @@ void HttpClient::setOptions(CURL* curl, const HttpRequest &request) {
 			checkForErrors(curlCode);
 		}
 		break;
-	case HTTP_PUT:
+	case HttpMethod::HTTP_PUT:
 		curlCode = curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
 		checkForErrors(curlCode);
 		curlCode = curl_easy_setopt(curl, CURLOPT_URL, request.mUrl.c_str());
@@ -502,7 +502,7 @@ void HttpClient::setOptions(CURL* curl, const HttpRequest &request) {
 		curlCode = curl_easy_setopt(curl, CURLOPT_COPYPOSTFIELDS, request.mRequestBody.c_str());
 		checkForErrors(curlCode);
 		break;
-	case HTTP_DELETE:
+	case HttpMethod::HTTP_DELETE:
 		curlCode = curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "DELETE");
 		checkForErrors(curlCode);
 		curlCode = curl_easy_setopt(curl, CURLOPT_URL, request.mUrl.c_str());
@@ -512,11 +512,11 @@ void HttpClient::setOptions(CURL* curl, const HttpRequest &request) {
 		curlCode = curl_easy_setopt(curl, CURLOPT_COPYPOSTFIELDS, request.mRequestBody.c_str());
 		checkForErrors(curlCode);
 		break;
-	case HTTP_HEADERS:
+	case HttpMethod::HTTP_HEADERS:
 		curlCode = curl_easy_setopt(curl, CURLOPT_URL, request.mUrl.c_str());
 		checkForErrors(curlCode);
 		break;
-	case HTTP_PATCH:
+	case HttpMethod::HTTP_PATCH:
 		curlCode = curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PATCH");
 		checkForErrors(curlCode);
 		curlCode = curl_easy_setopt(curl, CURLOPT_URL, request.mUrl.c_str());
@@ -550,7 +550,7 @@ void HttpClient::cleanupRequest(CURL* curl) {
 	// clean up request map, response map, header map
 	HttpRequest request = mHandleMap[curl];
 
-	if (request.mTarget == FILE) {
+	if (request.mTarget == DataTarget::FILE) {
 		std::fclose(mFile);
 	}
 	else {

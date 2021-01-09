@@ -11,6 +11,7 @@
 #include <memory>
 #include <iostream>
 #include <functional>
+#include <stdio.h>
 #include "jsoncpp/json.h"
 #include "curl/curl.h"
 
@@ -37,7 +38,7 @@ namespace sitara {
 		class HttpClient;
 
 		struct HttpRequest {
-			HttpRequest() : mMethod(HTTP_NONE), mUrl(""), mRequestBody(""), mTarget(MEMORY), mFilename(""), mCallback(NULL) {};
+			HttpRequest() : mMethod(HttpMethod::HTTP_NONE), mUrl(""), mRequestBody(""), mTarget(DataTarget::MEMORY), mFilename(""), mCallback(NULL) {};
 
 			HttpMethod mMethod;
 			std::string mUrl;

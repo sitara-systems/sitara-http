@@ -12,7 +12,7 @@ The easiest way to get this working is via [vcpkg](https://github.com/microsoft/
 git clone https://github.com/microsoft/vcpkg/
 cd vcpkg
 ./bootstrap-vcpkg.bat
-./vcpkg.exe install curl[openssl]:x64-windows
+./vcpkg.exe install curl[ssl]:x64-windows
 ./vcpkg.exe integrate install
 ```
 

@@ -5,7 +5,7 @@
     <BLOCK_ROOT>..\..\..</BLOCK_ROOT>
   </PropertyGroup>
   <PropertyGroup>
-    <_PropertySheetDisplayName>sitara-http-example</_PropertySheetDisplayName>
+    <_PropertySheetDisplayName>sitara-http-example-release</_PropertySheetDisplayName>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
