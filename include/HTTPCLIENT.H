@@ -72,6 +72,7 @@ namespace sitara {
 			std::string jsonToString(const Json::Value &value);
 			Json::Value stringToJson(const std::string &string);
 			std::string checkHttpStatus(int responseCode);
+			void setCaCertPath(std::string path);
 		protected:
 			HttpClient();
 			void updateThreads();
@@ -97,6 +98,7 @@ namespace sitara {
 			std::thread mUpdateThread;
 			std::mutex mUpdateMutex;
 			std::string mUserAgent;
+			std::string mCertificatePath;
 			std::map<CURL*, HttpRequest> mHandleMap;
 			std::map<CURL*, std::string> mResponseBodyMap;
 			std::map<CURL*, std::string> mResponseHeaderMap;

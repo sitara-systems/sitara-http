@@ -16,6 +16,7 @@ HttpClient::HttpClient() {
 	multiCode = curl_multi_setopt(mMultiCurl, CURLMOPT_MAXCONNECTS, mMaxNumberOfThreads);
 	checkForMultiErrors(multiCode);
 	mUserAgent = "Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)";
+	mCertificatePath = "";
 	mRunUpdateThread = true;
 	mUpdateThread = std::thread(&HttpClient::updateThreads, this);
 	mFile = NULL;
@@ -303,6 +304,10 @@ std::string HttpClient::checkHttpStatus(int responseCode) {
 	}
 }
 
+void HttpClient::setCaCertPath(std::string path) {
+	mCertificatePath = path;
+}
+
 void HttpClient::updateThreads() {
 	while (mRunUpdateThread) {
 		CURLMcode multiCode;
@@ -446,6 +451,10 @@ void HttpClient::setOptions(CURL* curl, const HttpRequest &request) {
 	//curlCode = curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0); // this line makes it work under Https
 	//checkForErrors(curlCode);
 
+	if (mCertificatePath != "") {
+		curlCode = curl_easy_setopt(curl, CURLOPT_CAINFO, mCertificatePath.c_str());
+		checkForErrors(curlCode);
+	}
 
 	if (request.mTarget == MEMORY) {
 		curlCode = curl_easy_setopt(curl, CURLOPT_WRITEDATA, &mResponseBodyMap[curl]);
