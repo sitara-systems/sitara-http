@@ -12,15 +12,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
     </Filter>
-    <Filter Include="blocks">
-      <UniqueIdentifier>{2d5af054-9cf8-4ff9-979e-b254e84a0091}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="blocks\sitara-http">
-      <UniqueIdentifier>{822559f4-076a-46b5-905f-3c00db4c415c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="blocks\sitara-http\src">
-      <UniqueIdentifier>{6922cbc5-818b-4ed8-9317-f58ac346cda0}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\multiHttpRequestExampleApp.cpp">
@@ -32,16 +23,10 @@
     <ClInclude Include="..\include\Resources.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClCompile Include="..\..\..\src\HttpClient.cpp">
-      <Filter>blocks\sitara-http\src</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\Resources.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\HttpClient.h">
-      <Filter>blocks\sitara-http\src</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
