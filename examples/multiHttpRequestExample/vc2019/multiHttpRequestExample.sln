@@ -10,10 +10,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "multiHttpRequestExample", "
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cinder", "..\..\..\..\cinder\proj\vc2019\cinder.vcxproj", "{92B5BE70-DCAA-40E4-92D8-CC2B95AA28BE}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sitara-http", "..\..\..\proj\sitara-http\sitara-http.vcxproj", "{5FBF7A33-FED0-4922-8620-67ED5360CD67}"
-	ProjectSection(ProjectDependencies) = postProject
-		{92B5BE70-DCAA-40E4-92D8-CC2B95AA28BE} = {92B5BE70-DCAA-40E4-92D8-CC2B95AA28BE}
-	EndProjectSection
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sitara-http", "..\..\..\proj\sitara-http.vcxproj", "{5FBF7A33-FED0-4922-8620-67ED5360CD67}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
