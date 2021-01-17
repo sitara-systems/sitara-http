@@ -1,0 +1,8 @@
+Package: curl
+Feature: winssl
+Depends: curl
+Architecture: x64-windows-static
+Multi-Arch: same
+Description: Legacy name for schannel
+Type: Port
+Status: install ok half-installed

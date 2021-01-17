@@ -1,0 +1,11 @@
+Package: curl
+Version: 7.74.0
+Port-Version: 2
+Depends: zlib
+Architecture: x64-windows-static
+Multi-Arch: same
+Abi: 2354b342ff6b76e1d874a59875f731c7825a49fb
+Description: A library for transferring data with URLs
+Type: Port
+Default-Features: non-http, ssl
+Status: install ok installed
