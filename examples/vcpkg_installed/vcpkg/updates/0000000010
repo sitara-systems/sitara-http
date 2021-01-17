@@ -1,8 +1,0 @@
-Package: curl
-Feature: schannel
-Depends: curl
-Architecture: x64-windows-static
-Multi-Arch: same
-Description: SSL support (Secure Channel)
-Type: Port
-Status: install ok installed
